@@ -1,0 +1,800 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanyang Biologics | Decoding Biology</title>
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=Playfair+Display:wght@400;600;700&amp;display=swap" rel="stylesheet">
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        :root {
+            
+            --bg-deep: #0a0e1a;
+            --bg-panel: rgba(13, 27, 46, 0.6);
+            --accent-cyan: #00d4ff;
+            --accent-green: #00ff9d;
+            --accent-amber: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aab8;
+            
+            
+            
+            --space-unit: 8px;
+            --container-padding: 4vw;
+            --nav-height: 80px;
+            --border-radius-pill: 100px;
+            --border-radius-card: 4px; 
+            --border-width: 1px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        
+        #dna-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            
+            background: radial-gradient(circle at center, transparent 0%, var(--bg-deep) 100%);
+        }
+
+        
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        h1 {
+            font-size: clamp(3.5rem, 6vw, 7rem); 
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+        }
+
+        h2 {
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            margin-bottom: 32px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-width: 60ch;
+        }
+
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--container-padding);
+        }
+
+        
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--container-padding);
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 26, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--accent-cyan);
+        }
+
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border-radius: var(--border-radius-pill);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-cyan);
+            color: var(--bg-deep);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-content {
+            width: 100%;
+            max-width: 800px;
+            z-index: 2;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.6;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent-cyan), transparent);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+            40% {transform: translateX(-50%) translateY(-10px);}
+            60% {transform: translateX(-50%) translateY(-5px);}
+        }
+
+        
+        .section-padding {
+            padding: 120px 0;
+            border-top: 1px solid rgba(255,255,255,0.08); 
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            padding: 40px;
+            border-radius: var(--border-radius-card);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 10px 40px -10px rgba(0, 212, 255, 0.1);
+        }
+
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--accent-cyan);
+            display: block;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        
+        .platform-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .molecule-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .molecule-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 32px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .molecule-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: var(--accent-green);
+        }
+
+        .molecule-icon {
+            font-size: 2rem;
+            color: var(--accent-green);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 60px 0;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+        
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 30s linear infinite;
+        }
+
+        .partner-logo {
+            display: inline-block;
+            margin: 0 40px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.3);
+            font-family: 'Playfair Display', serif; 
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .pipeline-card {
+            border-top: 2px solid var(--accent-green);
+            background: var(--bg-panel);
+            padding: 32px;
+            position: relative;
+        }
+
+        .phase-indicator {
+            display: flex;
+            margin-top: 24px;
+            gap: 4px;
+        }
+
+        .phase-step {
+            height: 4px;
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        .phase-step.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-amber);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        
+        footer {
+            padding: 80px var(--container-padding);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #05080f;
+        }
+
+        .footer-col h4 {
+            color: #fff;
+            margin-bottom: 24px;
+            font-size: 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .nav-links { display: none; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .platform-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    
+    <canvas id="dna-canvas"></canvas>
+
+    
+    <nav>
+        <div class="logo">Nanyang Biologics</div>
+        <div class="nav-links">
+            <a href="#purpose">Purpose</a>
+            <a href="#platform">Platform</a>
+            <a href="#pipeline">Pipeline</a>
+            <a href="#people">People</a>
+        </div>
+        <a href="#contact" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.9rem;">Partner With Us</a>
+    </nav>
+
+    
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Decoding Biology.<br>Accelerating Cures.</h1>
+                <p>We combine machine learning with high-throughput biology to generate predictive models of human disease, unlocking new paths to therapeutic discovery.</p>
+                <div class="hero-buttons">
+                    <a href="#" class="btn btn-primary">Our Platform</a>
+                    <a href="#" class="btn btn-secondary">View Pipeline</a>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    
+    <section class="section-padding" id="purpose">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Scientists &amp; Engineers</span>
+                    <p style="margin-top: 12px; font-size: 0.9rem;">A cross-disciplinary team merging computational power with biological insight.</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">Disease Areas</span>
+                    <p style="margin-top: 12px; font-size: 0.9rem;">Targeting critical unmet needs in neuroscience, oncology, and metabolism.</p>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">$400M</span>
+                    <span class="stat-label">Capital Raised</span>
+                    <p style="margin-top: 12px; font-size: 0.9rem;">Backed by world-class investors committed to long-term transformation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section class="section-padding" id="platform">
+        <div class="container">
+            <div class="platform-layout">
+                <div>
+                    <h2>The Predictive Map of Human Biology</h2>
+                    <p>Our platform integrates induced pluripotent stem cells (iPSCs), CRISPR-based screening, and machine learning to create a high-resolution map of disease progression.</p>
+                    <br>
+                    <p>Unlike traditional discovery, we don't guess. We compute the most probable path to a cure.</p>
+                    <br>
+                    <a href="#" class="btn btn-secondary">Explore The Tech</a>
+                </div>
+                <div class="molecule-grid">
+                    <div class="molecule-item">
+                        <span class="molecule-icon">⬡</span>
+                        <h4>Phenotyping</h4>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Cellular imaging at scale.</p>
+                    </div>
+                    <div class="molecule-item">
+                        <span class="molecule-icon">⚡</span>
+                        <h4>Genomics</h4>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Single-cell sequencing data.</p>
+                    </div>
+                    <div class="molecule-item">
+                        <span class="molecule-icon">◈</span>
+                        <h4>Machine Learning</h4>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Deep learning models.</p>
+                    </div>
+                    <div class="molecule-item">
+                        <span class="molecule-icon">∞</span>
+                        <h4>Synthesis</h4>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Target validation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section class="marquee-container">
+        <div class="marquee-content">
+            <span class="partner-logo">MERCK</span>
+            <span class="partner-logo">NOVARTIS</span>
+            <span class="partner-logo">GILEAD</span>
+            <span class="partner-logo">REGENERON</span>
+            <span class="partner-logo">ASTRAZENECA</span>
+            <span class="partner-logo">SANOFI</span>
+            <span class="partner-logo">ROCHE</span>
+            <span class="partner-logo">MERCK</span>
+            <span class="partner-logo">NOVARTIS</span>
+            <span class="partner-logo">GILEAD</span>
+            <span class="partner-logo">REGENERON</span>
+        </div>
+    </section>
+
+    
+    <section class="section-padding" id="pipeline">
+        <div class="container">
+            <h2>Featured Pipeline</h2>
+            <div class="pipeline-grid">
+                <div class="pipeline-card">
+                    <span class="tag">Neuroscience</span>
+                    <h3>ALS / FTD Modulators</h3>
+                    <p style="font-size: 0.95rem; margin-top: 12px;">Small molecule correcting TDP-43 pathology.</p>
+                    <div class="phase-indicator">
+                        <div class="phase-step active"></div>
+                        <div class="phase-step active"></div>
+                        <div class="phase-step"></div>
+                        <div class="phase-step"></div>
+                    </div>
+                    <p style="font-size: 0.8rem; margin-top: 8px; text-align: right;">Pre-clinical</p>
+                </div>
+                <div class="pipeline-card">
+                    <span class="tag">Metabolic</span>
+                    <h3>NASH Regression</h3>
+                    <p style="font-size: 0.95rem; margin-top: 12px;">Novel target identified via human genetics.</p>
+                    <div class="phase-indicator">
+                        <div class="phase-step active"></div>
+                        <div class="phase-step"></div>
+                        <div class="phase-step"></div>
+                        <div class="phase-step"></div>
+                    </div>
+                    <p style="font-size: 0.8rem; margin-top: 8px; text-align: right;">Discovery</p>
+                </div>
+                <div class="pipeline-card">
+                    <span class="tag">Oncology</span>
+                    <h3>Solid Tumor ADC</h3>
+                    <p style="font-size: 0.95rem; margin-top: 12px;">Precision targeting of tumor microenvironment.</p>
+                    <div class="phase-indicator">
+                        <div class="phase-step active"></div>
+                        <div class="phase-step active"></div>
+                        <div class="phase-step active"></div>
+                        <div class="phase-step"></div>
+                    </div>
+                    <p style="font-size: 0.8rem; margin-top: 8px; text-align: right;">IND Enabling</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <footer>
+        <div class="footer-col">
+            <div class="logo">Nanyang Biologics</div>
+            <p style="margin-top: 16px; font-size: 0.9rem;">456 Alexandra Rd, #04-07<br>Fragrance Empire Building<br>Singapore 119962</p>
+        </div>
+        <div class="footer-col">
+            <h4>Company</h4>
+            <ul class="footer-links">
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Careers</a></li>
+                <li><a href="#">News</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Science</h4>
+            <ul class="footer-links">
+                <li><a href="#">Publications</a></li>
+                <li><a href="#">Platform</a></li>
+                <li><a href="#">Clinical Trials</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Connect</h4>
+            <ul class="footer-links">
+                <li><a href="#">LinkedIn</a></li>
+                <li><a href="#">Twitter</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    
+    <script>
+        const canvas = document.querySelector('#dna-canvas');
+        
+        
+        const scene = new THREE.Scene();
+        
+        scene.fog = new THREE.FogExp2(0x0a0e1a, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+        camera.position.y = 0;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        
+        const particleCount = 200; 
+        const particles = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+        const sizes = [];
+
+        
+        const colorCyan = new THREE.Color(0x00d4ff);
+        const colorGreen = new THREE.Color(0x00ff9d);
+
+        
+        const radius = 3;
+        const heightTotal = 40;
+        const turns = 4;
+        
+        
+        for (let i = 0; i < particleCount; i++) {
+            const t = (i / particleCount);
+            const angle = t * Math.PI * 2 * turns;
+            const y = (t - 0.5) * heightTotal;
+
+            
+            const x1 = Math.cos(angle) * radius;
+            const z1 = Math.sin(angle) * radius;
+            
+            
+            const x2 = Math.cos(angle + Math.PI) * radius;
+            const z2 = Math.sin(angle + Math.PI) * radius;
+
+            
+            positions.push(x1, y, z1);
+            colors.push(colorCyan.r, colorCyan.g, colorCyan.b);
+            sizes.push(0.15);
+
+            
+            positions.push(x2, y, z2);
+            colors.push(colorGreen.r, colorGreen.g, colorGreen.b);
+            sizes.push(0.15);
+        }
+
+        particles.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        particles.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        particles.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+
+        
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.9,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particleSystem = new THREE.Points(particles, particleMaterial);
+        scene.add(particleSystem);
+
+        
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+             
+             
+             const idx1 = i * 2;
+             const idx2 = i * 2 + 1;
+             
+             
+             const x1 = positions[idx1 * 3];
+             const y1 = positions[idx1 * 3 + 1];
+             const z1 = positions[idx1 * 3 + 2];
+
+             
+             const x2 = positions[idx2 * 3];
+             const y2 = positions[idx2 * 3 + 1];
+             const z2 = positions[idx2 * 3 + 2];
+
+             linePositions.push(x1, y1, z1);
+             linePositions.push(x2, y2, z2);
+        }
+
+        lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00d4ff,
+            transparent: true,
+            opacity: 0.15, 
+            blending: THREE.AdditiveBlending
+        });
+
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+
+        
+        const dustCount = 400;
+        const dustGeom = new THREE.BufferGeometry();
+        const dustPos = [];
+        for(let i=0; i<dustCount; i++) {
+            dustPos.push(
+                (Math.random() - 0.5) * 30,
+                (Math.random() - 0.5) * 40,
+                (Math.random() - 0.5) * 20
+            );
+        }
+        dustGeom.setAttribute('position', new THREE.Float32BufferAttribute(dustPos, 3));
+        const dustMat = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.4
+        });
+        const dustSystem = new THREE.Points(dustGeom, dustMat);
+        scene.add(dustSystem);
+
+        
+        function animate() {
+            requestAnimationFrame(animate);
+
+            
+            particleSystem.rotation.y += 0.002;
+            lines.rotation.y += 0.002;
+            
+            
+            dustSystem.rotation.y -= 0.0005;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const docHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = scrollY / docHeight;
+
+            
+            const targetRotation = scrollPercent * Math.PI * 4; 
+            
+            
+            
+            camera.position.z = 10 - (scrollPercent * 6); 
+            camera.position.y = -(scrollPercent * 10);
+            
+            
+            particleSystem.rotation.y = targetRotation;
+            lines.rotation.y = targetRotation;
+        });
+
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+
+</body></html>

@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soy Designer — Studio Journal for UI/UX Designers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0E0F11;
+    --bg2: #141618;
+    --bg3: #1A1C1F;
+    --border: #242628;
+    --border-light: #2E3033;
+    --text: #E8E6E1;
+    --text-soft: #9A9690;
+    --text-muted: #5A5752;
+    --accent: #4F8EF7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --accent-border: rgba(79,142,247,0.25);
+    --green: #3DD68C;
+    --green-dim: rgba(61,214,140,0.1);
+    --amber: #F59E0B;
+    --red: #F87171;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2.5rem;
+    position: sticky;
+    top: 0;
+    background: rgba(14,15,17,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .logo-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: glow 2.5s ease infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 0 6px var(--accent); }
+    50% { box-shadow: 0 0 14px var(--accent), 0 0 24px rgba(79,142,247,0.3); }
+  }
+
+  .nav-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--green);
+    background: var(--green-dim);
+    border: 1px solid rgba(61,214,140,0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.825rem;
+    font-weight: 400;
+    color: var(--text-soft);
+    text-decoration: none;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem !important;
+    color: var(--accent) !important;
+    border: 1px solid var(--accent-border) !important;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s !important;
+  }
+
+  .nav-cta:hover {
+    background: var(--accent-dim) !important;
+    color: var(--accent) !important;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 7rem 2.5rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 6rem;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .eyebrow-line {
+    flex: 1;
+    max-width: 40px;
+    height: 1px;
+    background: var(--border-light);
+  }
+
+  .eyebrow-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .dim { color: var(--text-muted); }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 2.75rem;
+    font-weight: 300;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: opacity 0.2s, transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-outline {
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    transition: border-color 0.2s, color 0.2s;
+    letter-spacing: -0.01em;
+  }
+
+  .btn-outline:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 3.5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat-item {}
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-num .unit { color: var(--accent); font-size: 1rem; }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
+  /* HERO RIGHT - Terminal card */
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeLeft {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .terminal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+
+  .t-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .t-red { background: #FF5F57; }
+  .t-yellow { background: #FEBC2E; }
+  .t-green { background: #28C840; }
+
+  .t-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .terminal-body {
+    padding: 1.25rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.8;
+  }
+
+  .t-line { display: flex; gap: 0.75rem; }
+  .t-prompt { color: var(--accent); }
+  .t-cmd { color: var(--text); }
+  .t-comment { color: var(--text-muted); }
+  .t-output { color: var(--green); padding-left: 1.25rem; }
+  .t-output.dim { color: var(--text-soft); }
+  .t-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    background: var(--accent);
+    animation: blink 1.1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Mini cards */
+  .mini-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .mini-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+
+  .mini-card:hover { border-color: var(--border-light); }
+
+  .mini-card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .mini-card-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .mini-card-val.green { color: var(--green); }
+  .mini-card-val.accent { color: var(--accent); }
+
+  .mini-card-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.68rem;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 0.35rem;
+  }
+
+  /* TICKER */
+  .ticker {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    overflow: hidden;
+    padding: 0.7rem 0;
+    z-index: 1;
+    position: relative;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 3.5rem;
+    animation: ticker 35s linear infinite;
+    white-space: nowrap;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .ticker-sep {
+    width: 3px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* COMMON */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-header {
+    margin-bottom: 3rem;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-label::before {
+    content: '//';
+    color: var(--text-muted);
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.75rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .section-title .accent { color: var(--accent); }
+
+  /* ABOUT */
+  .about-wrap {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .about-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5.5rem 2.5rem;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .about-avatar-wrap {
+    position: relative;
+  }
+
+  .about-avatar {
+    width: 200px;
+    height: 220px;
+    background: var(--bg3);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-avatar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,142,247,0.08), transparent 60%);
+  }
+
+  .avatar-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(79,142,247,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .avatar-icon {
+    position: relative;
+    z-index: 1;
+    opacity: 0.3;
+  }
+
+  .about-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .about-content h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .about-content p {
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    line-height: 1.75;
+    font-weight: 300;
+    max-width: 560px;
+    margin-bottom: 0.75rem;
+  }
+
+  .about-content p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .about-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.7rem;
+    border-radius: 5px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .tag:hover { border-color: var(--accent-border); color: var(--accent); }
+
+  /* BLOG */
+  .blog-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+  }
+
+  .view-all {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .view-all:hover { color: var(--accent); }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .post-card {
+    background: var(--bg);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+  }
+
+  .post-card:hover { background: var(--bg2); }
+
+  .post-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .post-cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .post-cat.green { color: var(--green); background: var(--green-dim); border-color: rgba(61,214,140,0.2); }
+  .post-cat.amber { color: var(--amber); background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.2); }
+
+  .post-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+  }
+
+  .post-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    flex: 1;
+  }
+
+  .post-excerpt {
+    font-size: 0.825rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .post-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+  }
+
+  .post-arrow {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    transition: transform 0.2s;
+  }
+
+  .post-card:hover .post-arrow { transform: translateX(3px); }
+
+  /* OFFERS */
+  .offers-wrap {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .offers-wrap::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    right: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(79,142,247,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .offers-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2.5rem;
+    position: relative;
+  }
+
+  .offers-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+  }
+
+  .offers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .offer-card {
+    background: var(--bg);
+    padding: 2.25rem;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .offer-card:hover { background: var(--bg3); }
+  .offer-card.featured { background: var(--bg3); }
+  .offer-card.featured:hover { background: #1F2124; }
+
+  .offer-card.featured::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), rgba(79,142,247,0.2));
+  }
+
+  .offer-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .offer-type::before { content: '//'; color: var(--border-light); }
+
+  .offer-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .offer-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.75rem;
+  }
+
+  .offer-featured-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    width: fit-content;
+  }
+
+  .offer-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    flex: 1;
+    font-weight: 300;
+  }
+
+  .offer-price {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .price-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .price-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  .offer-cta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: gap 0.2s;
+  }
+
+  .offer-card:hover .offer-cta { gap: 0.6rem; }
+
+  /* MRR CALC */
+  .mrr-bar {
+    margin-top: 2rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .mrr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .mrr-items {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+    align-items: center;
+  }
+
+  .mrr-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-soft);
+  }
+
+  .mrr-item span { color: var(--green); }
+  .mrr-sep { color: var(--text-muted); }
+
+  .mrr-total {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* NEWSLETTER */
+  .newsletter-wrap {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .newsletter-wrap::before {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(79,142,247,0.06), transparent 70%);
+    pointer-events: none;
+  }
+
+  .newsletter-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 7rem 2.5rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .newsletter-inner .section-label {
+    justify-content: center;
+  }
+
+  .newsletter-inner .section-title {
+    margin: 0.75rem 0 1.25rem;
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  }
+
+  .newsletter-inner p {
+    font-size: 0.9375rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+  }
+
+  .email-form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .email-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--bg2);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .email-input:focus { border-color: var(--accent); }
+  .email-input::placeholder { color: var(--text-muted); }
+
+  .email-btn {
+    padding: 0.75rem 1.25rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+
+  .email-btn:hover { opacity: 0.85; }
+
+  .email-note {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    margin-top: 1rem;
+  }
+
+  /* TESTIMONIALS */
+  .testi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 2.5rem;
+  }
+
+  .testi-card {
+    background: var(--bg);
+    padding: 2rem;
+    transition: background 0.2s;
+  }
+
+  .testi-card:hover { background: var(--bg2); }
+
+  .testi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .testi-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .testi-name {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .testi-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+    letter-spacing: 0.03em;
+  }
+
+  .testi-stars {
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+  }
+
+  .testi-quote {
+    font-size: 0.875rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 4rem 2.5rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 6rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .footer-brand p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    font-weight: 300;
+    max-width: 220px;
+  }
+
+  .footer-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .footer-col h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .footer-col a {
+    display: block;
+    font-size: 0.825rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 0.6rem;
+    transition: color 0.2s;
+    font-weight: 300;
+  }
+
+  .footer-col a:hover { color: var(--text); }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-bottom a { color: var(--text-muted); text-decoration: none; }
+  .footer-bottom a:hover { color: var(--text); }
+
+  /* REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a href="#" class="nav-logo">
+      <span class="logo-dot"></span>
+      soy_designer
+    </a>
+    <span class="nav-badge">v2.6 · live</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#blog">journal</a></li>
+    <li><a href="#about">about</a></li>
+    <li><a href="#offers">work_with_me</a></li>
+    <li><a href="#resources">resources</a></li>
+    <li><a href="#newsletter" class="nav-cta">subscribe →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div style="position:relative;z-index:1">
+  <div class="hero">
+    <div style="animation: fadeUp 0.8s ease both">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-tag">ui/ux · product design · studio journal</span>
+        <span class="eyebrow-line"></span>
+        <span class="eyebrow-version">2026.02</span>
+      </div>
+
+      <h1>Design work.<br><span class="accent">Ship better</span><br><span class="dim">products.</span></h1>
+      <p class="hero-sub">A studio journal where I share what actually happens in product design work — the process, the decisions, the tradeoffs, and the business side nobody talks about.</p>
+
+      <div class="hero-actions">
+        <a href="#blog" class="btn-primary">Read the journal →</a>
+        <a href="#offers" class="btn-outline">Work with me</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">2.4<span class="unit">k</span></div>
+          <div class="stat-label">subscribers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">6<span class="unit">+</span></div>
+          <div class="stat-label">years in product</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">48<span class="unit">%</span></div>
+          <div class="stat-label">open rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal + mini cards -->
+    <div class="hero-right">
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="t-dot t-red"></span>
+          <span class="t-dot t-yellow"></span>
+          <span class="t-dot t-green"></span>
+          <span class="t-title">studio_journal.sh</span>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">whoami</span></div>
+          <div class="t-line"><span class="t-output dim">product_designer · consultant · writer</span></div>
+          <div class="t-line" style="margin-top:0.4rem"><span class="t-prompt">$</span><span class="t-cmd">cat latest_post.md</span></div>
+          <div class="t-line"><span class="t-output">"How I redesigned my process</span></div>
+          <div class="t-line"><span class="t-output"> and doubled my rate"</span></div>
+          <div class="t-line"><span class="t-output dim"> → 8 min read · Feb 18</span></div>
+          <div class="t-line" style="margin-top:0.4rem"><span class="t-prompt">$</span><span class="t-cmd">ls resources/</span></div>
+          <div class="t-line"><span class="t-output dim">figma_kit.fig&nbsp;&nbsp;audit_template.notion</span></div>
+          <div class="t-line"><span class="t-output dim">proposal_doc.md&nbsp;&nbsp;portfolio_guide.pdf</span></div>
+          <div class="t-line" style="margin-top:0.4rem"><span class="t-prompt">$</span><span class="t-cmd">join newsletter<span class="t-cursor"></span></span></div>
+        </div>
+      </div>
+
+      <div class="mini-cards">
+        <div class="mini-card">
+          <div class="mini-card-label">subscribers</div>
+          <div class="mini-card-val accent">2,419</div>
+          <div class="trend">↑ +14 this week</div>
+        </div>
+        <div class="mini-card">
+          <div class="mini-card-label">open rate</div>
+          <div class="mini-card-val green">48.2%</div>
+          <div class="mini-card-sub" style="color:var(--text-muted); font-size:0.65rem; font-family:'JetBrains Mono',monospace">avg: 21.5% · 2×</div>
+        </div>
+        <div class="mini-card" style="grid-column: span 2">
+          <div class="mini-card-label">latest issue · feb 18, 2026</div>
+          <div style="font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:600; color:var(--text); line-height:1.3; letter-spacing:-0.02em; margin-top:0.25rem">How I Redesigned My Client Process (and Doubled My Rate)</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--accent); margin-top:0.5rem; cursor:pointer">read now →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">UI/UX Process<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Client Work<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Design Systems<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Freelance & Consulting<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Portfolio Reviews<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Figma Templates<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Studio Journal<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Product Critique<span class="ticker-sep"></span></span>
+    <span class="ticker-item">UI/UX Process<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Client Work<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Design Systems<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Freelance & Consulting<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Portfolio Reviews<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Figma Templates<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Studio Journal<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Product Critique<span class="ticker-sep"></span></span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about-wrap" id="about">
+  <div class="about-inner">
+    <div class="about-avatar-wrap reveal">
+      <div class="about-avatar">
+        <div class="avatar-grid"></div>
+        <div class="avatar-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(79,142,247,0.5)" stroke-width="0.75">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+      </div>
+      <div class="about-status">
+        <span class="status-dot"></span>
+        available for consulting
+      </div>
+    </div>
+
+    <div class="about-content reveal">
+      <div class="section-label">about this journal</div>
+      <h2>6+ years in product.<br>Writing about what actually works.</h2>
+      <p>I've worked across startups, agencies, and my own consulting practice. After years of figuring things out the hard way — bad client setups, scope creep, undercharging, over-delivering — I started writing about <strong>what I wish I'd known earlier</strong>.</p>
+      <p>This isn't theory. Every post comes from real project work, real decisions, and real numbers. If you're a designer trying to do better work and build a sustainable practice, this is for you.</p>
+      <div class="about-tags">
+        <span class="tag">figma</span>
+        <span class="tag">ux research</span>
+        <span class="tag">design systems</span>
+        <span class="tag">product strategy</span>
+        <span class="tag">freelancing</span>
+        <span class="tag">consulting</span>
+        <span class="tag">client management</span>
+        <span class="tag">portfolio</span>
+      </div>
+      <div style="display:flex; gap:0.75rem;">
+        <a href="#blog" class="btn-primary">Read the journal →</a>
+        <a href="#offers" class="btn-outline">Work with me</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BLOG -->
+<section id="blog">
+  <div class="blog-header-row reveal">
+    <div class="section-header" style="margin-bottom:0">
+      <div class="section-label">recent posts</div>
+      <h2 class="section-title">From the <span class="accent">journal</span></h2>
+    </div>
+    <a href="#" class="view-all">view all posts →</a>
+  </div>
+
+  <div class="blog-grid reveal" style="margin-top:2rem">
+    <a href="#" class="post-card">
+      <div class="post-top">
+        <span class="post-cat">UX Process</span>
+        <span class="post-num">#047</span>
+      </div>
+      <div class="post-title">How I Redesigned My Client Process and Doubled My Hourly Rate</div>
+      <div class="post-excerpt">The exact intake changes, contract structure, and communication shifts — and what happened to my revenue when I made them.</div>
+      <div class="post-footer">
+        <span class="post-date">Feb 18, 2026</span>
+        <span class="post-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="#" class="post-card">
+      <div class="post-top">
+        <span class="post-cat green">Freelance</span>
+        <span class="post-num">#046</span>
+      </div>
+      <div class="post-title">The Design Projects I Said No To — And Why It Was the Right Call</div>
+      <div class="post-excerpt">How I built criteria for which work to take, which to decline, and how that slowly shaped my reputation and rate.</div>
+      <div class="post-footer">
+        <span class="post-date">Feb 10, 2026</span>
+        <span class="post-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="#" class="post-card">
+      <div class="post-top">
+        <span class="post-cat amber">Resources</span>
+        <span class="post-num">#045</span>
+      </div>
+      <div class="post-title">My Figma Component Library for Early-Stage Products [Free Template]</div>
+      <div class="post-excerpt">A practical, opinionated system built for startups moving fast. Zero design debt, full flexibility.</div>
+      <div class="post-footer">
+        <span class="post-date">Jan 28, 2026</span>
+        <span class="post-arrow">→</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- OFFERS -->
+<div class="offers-wrap" id="offers">
+  <div class="offers-inner">
+    <div class="offers-top reveal">
+      <div>
+        <div class="section-label">work with me</div>
+        <h2 class="section-title">Ways to go <span class="accent">deeper</span></h2>
+      </div>
+    </div>
+
+    <div class="offers-grid reveal">
+      <div class="offer-card">
+        <div class="offer-type">consulting</div>
+        <div class="offer-icon">🎯</div>
+        <div class="offer-name">1:1 Strategy Session</div>
+        <div class="offer-desc">60 minutes on your exact challenge — portfolio audit, project review, career decisions, or client situation. Direct, no-fluff feedback.</div>
+        <div class="offer-price">
+          <div>
+            <div class="price-val">$250</div>
+            <div class="price-sub">// per session</div>
+          </div>
+          <div class="offer-cta">book call →</div>
+        </div>
+      </div>
+
+      <div class="offer-card featured">
+        <div class="offer-type">membership</div>
+        <div class="offer-featured-badge">// most popular</div>
+        <div class="offer-icon">⚡</div>
+        <div class="offer-name">Studio Member</div>
+        <div class="offer-desc">Monthly deep-dive essays, live design critiques, private community, and full access to all templates and resources. The journal, plus a lot more.</div>
+        <div class="offer-price">
+          <div>
+            <div class="price-val">$19</div>
+            <div class="price-sub">// per month</div>
+          </div>
+          <div class="offer-cta">join studio →</div>
+        </div>
+      </div>
+
+      <div class="offer-card">
+        <div class="offer-type">digital products</div>
+        <div class="offer-icon">📦</div>
+        <div class="offer-name">Templates & Toolkits</div>
+        <div class="offer-desc">Figma component libs, UX audit frameworks, proposal templates, portfolio guides. Built from real studio work, not hypotheticals.</div>
+        <div class="offer-price">
+          <div>
+            <div class="price-val">$29+</div>
+            <div class="price-sub">// one-time</div>
+          </div>
+          <div class="offer-cta">browse shop →</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mrr-bar reveal">
+      <span class="mrr-label">// $1,500 MRR path</span>
+      <div class="mrr-items">
+        <span class="mrr-item">40 members × $19 = <span>$760</span></span>
+        <span class="mrr-sep">+</span>
+        <span class="mrr-item">3 sessions/mo = <span>$750</span></span>
+        <span class="mrr-sep">+</span>
+        <span class="mrr-item">templates passive = <span>$200+</span></span>
+      </div>
+      <span class="mrr-total">→ $1,710 MRR</span>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="reveal">
+    <div class="section-label">social proof</div>
+    <h2 class="section-title">What <span class="accent">readers</span> say</h2>
+  </div>
+
+  <div class="testi-grid reveal">
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#3B6EA8">MR</div>
+          <div>
+            <div class="testi-name">Mia R.</div>
+            <div class="testi-role">product_designer @ Shopify</div>
+          </div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testi-quote">"The only design newsletter I actually look forward to reading. Honest, practical, doesn't try to upsell me every other email."</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#2D6A4F">JP</div>
+          <div>
+            <div class="testi-name">Jonas P.</div>
+            <div class="testi-role">freelance_ux_designer</div>
+          </div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testi-quote">"The consulting session saved me from a terrible client contract. Changed how I think about proposals — worth way more than $250."</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#744210">AL</div>
+          <div>
+            <div class="testi-name">Ana L.</div>
+            <div class="testi-role">ux_lead @ early_stage_startup</div>
+          </div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testi-quote">"3 months as a Studio Member. The community alone is worth it — real critique, no posturing. My portfolio is noticeably better."</div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-header">
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#4A3B7A">TN</div>
+          <div>
+            <div class="testi-name">Tomas N.</div>
+            <div class="testi-role">design_engineer · Berlin</div>
+          </div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+      <div class="testi-quote">"The Figma component kit is absurd value. Clean, well-documented, works with real product workflows. Used it on 4 projects already."</div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<div class="newsletter-wrap" id="newsletter">
+  <div class="newsletter-inner reveal">
+    <div class="section-label">weekly letter</div>
+    <h2 class="section-title">Design honestly.<br><span class="accent">Build better.</span></h2>
+    <p>One focused essay per week on design craft, the freelance/consulting game, and building a practice that actually sustains you. No filler.</p>
+    <div class="email-form">
+      <input class="email-input" type="email" placeholder="your@email.com">
+      <button class="email-btn">subscribe →</button>
+    </div>
+    <div class="email-note">// 2,400+ designers · no spam · unsubscribe anytime</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-dot" style="width:6px;height:6px"></span>
+          soy_designer
+        </div>
+        <p>A studio journal for product designers. Real work. Real process. Real talk.</p>
+      </div>
+      <div class="footer-nav">
+        <div class="footer-col">
+          <h4>journal</h4>
+          <a href="#">ux process</a>
+          <a href="#">freelance & clients</a>
+          <a href="#">career</a>
+          <a href="#">design systems</a>
+          <a href="#">case studies</a>
+        </div>
+        <div class="footer-col">
+          <h4>work_with_me</h4>
+          <a href="#">1:1 consulting</a>
+          <a href="#">studio membership</a>
+          <a href="#">templates & kits</a>
+          <a href="#">portfolio review</a>
+        </div>
+        <div class="footer-col">
+          <h4>connect</h4>
+          <a href="#">newsletter</a>
+          <a href="#">twitter / x</a>
+          <a href="#">linkedin</a>
+          <a href="#">dribbble</a>
+          <a href="#">github</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 soy_designer · made with intention</span>
+      <span><a href="#">privacy</a> · <a href="#">terms</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nanyang Biologics — Synthetic Genomics Lab | Human Architecture &amp; Design Bureau</title>
+    <meta name="description" content="Precision genetic engineering for aesthetic and functional optimization. CRISPR sequencing, chromosomal archival, and biosystem design by Nanyang Biologics.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+    <style>
+        /* ── DESIGN TOKENS ── */
+        :root {
+            --black: #0a0a08;
+            --white: #f2f0eb;
+            --acid: #c8f53b;
+            --acid-dark: #8fb020; /* darker acid for text on white bg: passes AA */
+            --dim: #1e1e1a;
+            --text-muted: #a8a69f;        /* replaces low-contrast rgba whites — 4.6:1 on --dim */
+            --text-ghost: #767470;        /* minimum decorative use only */
+            --text-on-acid: #0a0a08;      /* black on acid-green: 12.6:1 */
+            --spec-key-dark: #8c8a85;     /* on --black: 4.5:1 */
+            --spec-key-light: #3a3830;    /* on --acid: 4.5:1 */
+            --footer-muted: #7a7870;      /* on #050504: 4.6:1 */
+            --cta-body: #2e2c28;          /* body copy on acid: 8.1:1 */
+            --font-display: 'Bebas Neue', sans-serif;
+            --font-body: 'DM Mono', monospace;
+            --font-serif: 'Cormorant Garamond', serif;
+            --focus-ring: 3px solid #c8f53b;
+            --focus-offset: 3px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Respect motion preference for smooth scroll */
+        @media (prefers-reduced-motion: no-preference) {
+            html { scroll-behavior: smooth; }
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+        }
+        /* Prevent scrolling while landing overlay is active */
+        body:not(.view-active) { overflow: hidden; }
+
+        /* ── SKIP LINK ── */
+        .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 1rem;
+            z-index: 10000;
+            background: var(--acid);
+            color: var(--text-on-acid);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--black);
+        }
+        .skip-link:focus { top: 1rem; }
+
+        /* ── CUSTOM CURSOR (pointer device only, non-touch) ── */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            #cursor {
+                position: fixed; width: 8px; height: 8px;
+                background: var(--acid); border-radius: 50%;
+                pointer-events: none; z-index: 9999;
+                transform: translate(-50%, -50%);
+                mix-blend-mode: difference;
+            }
+            #cursor-ring {
+                position: fixed; width: 36px; height: 36px;
+                border: 1px solid rgba(200,245,59,0.5); border-radius: 50%;
+                pointer-events: none; z-index: 9998;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* ── GLOBAL FOCUS STYLES ── */
+        :focus-visible {
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-offset);
+        }
+        /* Remove default outline only after confirming :focus-visible works */
+        :focus:not(:focus-visible) { outline: none; }
+
+        /* ── NOISE OVERLAY (decorative, hidden from AT) ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.03; pointer-events: none; z-index: 9997;
+            aria-hidden: true;
+        }
+
+        /* ── LANDING VIEW ── */
+        #landing-view {
+            position: fixed; inset: 0; z-index: 200;
+            background: var(--black);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 2.5rem 3rem;
+            overflow: hidden;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            #landing-view { transition: transform 1.1s cubic-bezier(0.77, 0, 0.175, 1); }
+            .view-active #landing-view { transform: translateY(-100%); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .view-active #landing-view { display: none; }
+        }
+
+        #landing-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+        .landing-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(200,245,59,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(200,245,59,0.04) 1px, transparent 1px);
+            background-size: 60px 60px; z-index: 1;
+        }
+
+        .nav-minimal {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--text-muted); z-index: 10; position: relative;
+        }
+        .nav-minimal .logo {
+            color: var(--white); font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.2em;
+        }
+
+        /* Status indicator: purely decorative, label provided in text */
+        .status-dot {
+            display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+            background: var(--acid); margin-right: 0.5rem; vertical-align: middle;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .status-dot { animation: blink 2s infinite; }
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+        .mission-overlay { z-index: 10; position: relative; }
+        .mission-overlay h2 {
+            font-family: var(--font-display);
+            font-size: clamp(3.5rem, 8vw, 7.5rem); line-height: 0.87;
+            color: var(--white); margin-bottom: 2rem;
+        }
+        .mission-overlay h2 em { color: var(--acid); font-style: normal; }
+        /* Ensure body text on landing has sufficient contrast */
+        .mission-overlay p {
+            font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-muted); max-width: 38ch; line-height: 1.9;
+        }
+
+        .enter-container { z-index: 10; position: relative; display: flex; justify-content: flex-end; align-items: flex-end; }
+        .enter-btn {
+            background: none; border: 2px solid transparent; text-align: right; color: var(--white);
+            padding: 0.5rem;
+        }
+        .enter-label {
+            font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--text-muted); display: block; margin-bottom: 0.6rem;
+        }
+        .enter-big {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 9vw, 8.5rem); line-height: 0.85; display: block;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .enter-big { transition: color 0.3s, letter-spacing 0.3s; }
+        }
+        .enter-btn:hover .enter-big,
+        .enter-btn:focus-visible .enter-big { color: var(--acid); letter-spacing: 0.04em; }
+        .enter-btn:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+
+        /* ── LAB VIEW ── */
+        #lab-view { position: relative; }
+        @media (prefers-reduced-motion: no-preference) {
+            #lab-view { opacity: 0; visibility: hidden; transition: opacity 0.8s ease 0.4s; }
+            .view-active #lab-view { opacity: 1; visibility: visible; }
+        }
+
+        /* ── SITE NAV ── */
+        .site-nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.4rem 3rem;
+            background: rgba(10,10,8,0.92); backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(242,240,235,0.07);
+        }
+        .site-nav .wordmark { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 0.15em; }
+        .site-nav ul { display: flex; gap: 3rem; list-style: none; }
+        .site-nav ul a {
+            font-size: 0.63rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-muted); text-decoration: none;
+            border-bottom: 1px solid transparent; padding-bottom: 2px;
+        }
+        .site-nav ul a:hover { color: var(--white); border-bottom-color: var(--white); }
+        .site-nav ul a:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+        .nav-cta {
+            font-size: 0.63rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-on-acid); background: var(--acid); border: 2px solid var(--acid);
+            padding: 0.6rem 1.4rem; font-family: var(--font-body);
+        }
+        .nav-cta:hover { background: transparent; color: var(--acid); }
+        .nav-cta:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+
+        /* ── HERO ── */
+        .hero-section {
+            min-height: 100vh; display: flex; align-items: flex-end;
+            padding: 0 3rem 5rem; position: relative; overflow: hidden;
+        }
+        #dna-canvas-hero { position: absolute; top: 0; right: 0; width: 55%; height: 100%; pointer-events: none; z-index: 1; }
+        .hero-gradient { position: absolute; top: 0; left: 0; width: 65%; height: 100%; background: linear-gradient(90deg, var(--black) 55%, transparent); z-index: 2; }
+        .hero-content { position: relative; z-index: 3; }
+
+        .hero-eyebrow {
+            font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--acid); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem;
+        }
+        .hero-eyebrow::before { content: ''; width: 36px; height: 1px; background: var(--acid); display: block; }
+
+        /* h1 screen-reader text is full word; visual split is decorative spans */
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(5rem, 13vw, 14rem);
+            line-height: 0.87; letter-spacing: 0.01em; margin-bottom: 3.5rem;
+        }
+        .hero-title .outline { -webkit-text-stroke: 1px var(--white); color: transparent; }
+        .hero-title .acid-text { color: var(--acid); }
+
+        .hero-bottom { display: flex; align-items: flex-end; gap: 5rem; flex-wrap: wrap; }
+        .hero-desc {
+            font-size: 0.75rem; letter-spacing: 0.08em; line-height: 2;
+            text-transform: uppercase; color: var(--text-muted); max-width: 30ch;
+        }
+
+        /* Stats as dl for semantics */
+        .hero-stats { display: flex; gap: 4rem; }
+        .hero-stats dl { display: contents; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-num {
+            font-family: var(--font-display); font-size: 3.5rem; color: var(--white); line-height: 1;
+        }
+        .stat-num .accent { color: var(--acid); }
+        .stat-lbl {
+            font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-muted); margin-top: 0.3rem;
+        }
+
+        /* ── MARQUEE ── */
+        .marquee-bar {
+            overflow: hidden;
+            border-top: 1px solid rgba(242,240,235,0.1);
+            border-bottom: 1px solid rgba(242,240,235,0.1);
+            padding: 1rem 0; background: var(--dim);
+        }
+        .marquee-track {
+            display: flex; white-space: nowrap;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .marquee-track { animation: marquee 28s linear infinite; }
+        }
+        .marquee-item {
+            font-family: var(--font-display); font-size: 1rem; letter-spacing: 0.2em;
+            padding: 0 3rem; color: var(--text-ghost); flex-shrink: 0;
+        }
+        .marquee-item .dot { color: var(--acid); margin-right: 3rem; }
+        @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+        /* ── ABOUT ── */
+        .about-section { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; }
+        .about-left { padding: 8rem 3rem; border-right: 1px solid rgba(242,240,235,0.08); display: flex; flex-direction: column; justify-content: space-between; }
+        .about-right { padding: 8rem 3rem; background: var(--dim); display: flex; flex-direction: column; justify-content: center; gap: 2rem; }
+
+        .section-tag {
+            font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--acid); margin-bottom: 2.5rem;
+        }
+        /* Remove pseudo-content brackets — they're read by screen readers as "open bracket" */
+
+        .big-heading {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 5vw, 5.5rem); line-height: 0.9; letter-spacing: 0.02em;
+        }
+        .serif-body {
+            font-family: var(--font-serif); font-size: 1.3rem; line-height: 1.75;
+            color: rgba(242,240,235,0.75); font-style: italic; max-width: 42ch;
+        }
+        .serif-body em { color: var(--white); font-style: normal; }
+
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 2rem; }
+        .metric-box { background: rgba(242,240,235,0.04); padding: 1.8rem; border: 1px solid rgba(242,240,235,0.07); }
+        .metric-val { font-family: var(--font-display); font-size: 2.6rem; color: var(--acid); line-height: 1; }
+        .metric-lbl { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.4rem; }
+
+        /* ── PRODUCTS ── */
+        .products-section { padding: 8rem 3rem; }
+        .products-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 4rem; padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(242,240,235,0.08);
+        }
+        .products-heading { font-family: var(--font-display); font-size: clamp(3.5rem, 7vw, 7rem); line-height: 0.88; }
+        .products-heading .sub {
+            display: block; font-family: var(--font-body); font-size: 0.65rem;
+            letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 0.8rem;
+        }
+        .view-all {
+            font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--acid); text-decoration: underline; text-underline-offset: 4px;
+            text-decoration-color: rgba(200,245,59,0.4);
+        }
+        .view-all:hover { text-decoration-color: var(--acid); }
+        .view-all:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+        .product-card {
+            background: var(--dim); border: 1px solid rgba(242,240,235,0.05);
+            padding: 2.8rem 2.5rem; position: relative; overflow: hidden;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+            .product-card { transition: background 0.35s; }
+            .product-card::before {
+                content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+                background: var(--acid); transform: scaleX(0); transform-origin: left;
+                transition: transform 0.4s cubic-bezier(0.77,0,0.175,1);
+            }
+            .product-card:hover::before,
+            .product-card:focus-within::before { transform: scaleX(1); }
+        }
+        .product-card:hover,
+        .product-card:focus-within { background: #222219; }
+        .product-card.featured { grid-column: span 2; }
+
+        .card-id { font-size: 0.62rem; letter-spacing: 0.15em; color: var(--text-muted); margin-bottom: 2.5rem; }
+        .card-icon { width: 44px; height: 44px; margin-bottom: 1.8rem; }
+        .card-category { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--acid); margin-bottom: 0.8rem; }
+        .card-name { font-family: var(--font-display); font-size: 1.9rem; letter-spacing: 0.04em; margin-bottom: 1.2rem; line-height: 1; }
+        .card-desc { font-size: 0.72rem; letter-spacing: 0.05em; line-height: 1.95; color: var(--text-muted); text-transform: uppercase; max-width: 36ch; margin-bottom: 1.5rem; }
+        .card-price { font-family: var(--font-display); font-size: 1.5rem; color: var(--white); }
+        .card-price .unit { font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.1em; color: var(--text-muted); margin-left: 0.4rem; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 2.5rem; padding-top: 1.8rem; border-top: 1px solid rgba(242,240,235,0.08); }
+
+        .card-btn {
+            font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--text-on-acid); background: var(--acid);
+            border: 2px solid var(--acid);
+            padding: 0.65rem 1.4rem; font-family: var(--font-body);
+        }
+        .card-btn:hover { background: transparent; color: var(--acid); }
+        .card-btn:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+        .card-btn.ghost { background: transparent; color: var(--white); border-color: rgba(242,240,235,0.35); }
+        .card-btn.ghost:hover { border-color: var(--white); }
+
+        .card-status { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+        /* Status indicators: color conveys info, so we add text label (already present) */
+        .status-on::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--acid); margin-right: 0.4rem; vertical-align: middle; }
+        .status-ltd::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #e8872a; margin-right: 0.4rem; vertical-align: middle; }
+        /* "Limited Slots" / "Available" text labels remain visible — color is supplementary */
+
+        /* ── PROCESS ── */
+        .process-section { padding: 8rem 3rem; background: var(--dim); border-top: 1px solid rgba(242,240,235,0.06); }
+        .process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 5rem; }
+        .process-step { padding: 2.5rem 2.5rem 2.5rem 0; border-right: 1px solid rgba(242,240,235,0.08); position: relative; }
+        .process-step:last-child { border-right: none; padding-right: 0; }
+        /* Decorative large number — hidden from AT */
+        .step-num { font-family: var(--font-display); font-size: 5rem; line-height: 1; color: rgba(242,240,235,0.06); position: absolute; top: 0.5rem; right: 1.5rem; }
+        .step-icon { width: 38px; height: 38px; border: 1px solid rgba(200,245,59,0.35); display: flex; align-items: center; justify-content: center; color: var(--acid); font-size: 1rem; margin-bottom: 1.8rem; }
+        .step-title { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.03em; margin-bottom: 0.9rem; }
+        .step-desc { font-size: 0.7rem; letter-spacing: 0.05em; line-height: 2; color: var(--text-muted); text-transform: uppercase; }
+        .step-dur { margin-top: 1.8rem; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--acid); }
+
+        /* ── TESTIMONIALS ── */
+        .testimonials-section { padding: 8rem 3rem; overflow: hidden; }
+        .t-scroll {
+            display: flex; gap: 2px; overflow-x: auto;
+            padding-bottom: 1rem;
+            /* Visible scrollbar helps all users discover scroll */
+            scrollbar-color: var(--text-ghost) var(--dim);
+            scrollbar-width: thin;
+        }
+        .t-card { min-width: 360px; padding: 2.8rem; background: var(--dim); border: 1px solid rgba(242,240,235,0.06); flex-shrink: 0; }
+        .t-quote {
+            font-family: var(--font-serif); font-size: 1.25rem; font-style: italic;
+            line-height: 1.65; color: rgba(242,240,235,0.85); margin-bottom: 2rem;
+        }
+        .t-quote em { color: var(--white); font-style: normal; }
+        .t-meta { display: flex; justify-content: space-between; align-items: center; }
+        .t-name { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white); }
+        .t-role { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.2rem; }
+        .t-stars { color: var(--acid); letter-spacing: 0.08em; font-size: 0.7rem; }
+
+        /* ── SPECS ── */
+        .specs-section { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(242,240,235,0.06); }
+        .specs-dark { padding: 8rem 3rem; background: var(--black); }
+        .specs-light { padding: 8rem 3rem; background: var(--acid); color: var(--text-on-acid); }
+        .specs-light .section-tag { color: var(--spec-key-light); }
+        .specs-heading { font-family: var(--font-display); font-size: clamp(2.8rem, 4.5vw, 5rem); line-height: 0.88; }
+        .specs-light .specs-heading { color: var(--text-on-acid); }
+        .spec-list { margin-top: 3rem; }
+        .spec-row {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding: 1.2rem 0; border-bottom: 1px solid rgba(242,240,235,0.08);
+            font-size: 0.68rem; letter-spacing: 0.09em; text-transform: uppercase;
+        }
+        .specs-light .spec-row { border-bottom-color: rgba(0,0,0,0.18); }
+        /* Use <dt> and <dd> semantics in markup; style with these classes */
+        .sk { color: var(--spec-key-dark); }
+        .specs-light .sk { color: var(--spec-key-light); }
+        .sv { color: var(--white); }
+        .specs-light .sv { color: var(--text-on-acid); font-weight: 600; }
+        .cert-badges { display: flex; gap: 0.7rem; margin-top: 2.5rem; flex-wrap: wrap; }
+        .cert {
+            border: 1px solid rgba(0,0,0,0.35); padding: 0.45rem 0.9rem;
+            font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--spec-key-light);
+        }
+
+        /* ── JOURNAL ── */
+        .journal-section { padding: 8rem 3rem; }
+        .journal-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 2px; margin-top: 4rem; }
+        .j-card { background: var(--dim); border: 1px solid rgba(242,240,235,0.06); padding: 2.5rem; }
+        @media (prefers-reduced-motion: no-preference) {
+            .j-card { transition: background 0.3s; }
+        }
+        .j-card:hover,
+        .j-card:focus-within { background: #232320; }
+        .j-card.large { padding: 3.5rem; }
+        .j-date { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.2rem; }
+        .j-tag { display: inline-block; font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-on-acid); background: var(--acid); padding: 0.28rem 0.65rem; margin-bottom: 1.2rem; }
+        .j-title { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; letter-spacing: 0.02em; margin-bottom: 1rem; }
+        .j-card.large .j-title { font-size: 2.3rem; }
+        .j-excerpt { font-size: 0.68rem; letter-spacing: 0.05em; line-height: 1.95; color: var(--text-muted); text-transform: uppercase; }
+        .j-read {
+            display: inline-block; margin-top: 1.8rem; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: var(--acid); text-decoration: underline; text-underline-offset: 4px;
+            text-decoration-color: rgba(200,245,59,0.35);
+        }
+        .j-read:hover { text-decoration-color: var(--acid); }
+        .j-read:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+
+        /* ── CTA BANNER ── */
+        .cta-banner {
+            margin: 0 3rem 8rem; background: var(--acid);
+            padding: 6rem 5rem; display: flex; justify-content: space-between; align-items: center;
+            position: relative; overflow: hidden;
+        }
+        .cta-banner::after {
+            content: ''; /* Remove decorative text — was read as "EVOLVE" by some AT */
+            position: absolute; right: -3rem; top: 50%; transform: translateY(-50%);
+            font-family: var(--font-display); font-size: 18rem; line-height: 1;
+            color: rgba(0,0,0,0.065); pointer-events: none; white-space: nowrap;
+        }
+        /* Use a separate aria-hidden span for the watermark text */
+        .cta-watermark {
+            position: absolute; right: -3rem; top: 50%; transform: translateY(-50%);
+            font-family: var(--font-display); font-size: 18rem; line-height: 1;
+            color: rgba(0,0,0,0.065); pointer-events: none; white-space: nowrap; user-select: none;
+        }
+        .cta-text { position: relative; z-index: 1; }
+        .cta-text h2 { font-family: var(--font-display); font-size: clamp(3rem, 6vw, 6rem); color: var(--text-on-acid); line-height: 0.88; margin-bottom: 1rem; }
+        .cta-text p { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cta-body); max-width: 38ch; line-height: 1.9; }
+        .cta-actions { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem; }
+        .cta-primary {
+            background: var(--black); color: var(--acid);
+            font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase;
+            padding: 1.1rem 2.4rem; border: 2px solid var(--black);
+        }
+        .cta-primary:hover { background: transparent; color: var(--black); border-color: var(--black); }
+        .cta-primary:focus-visible { outline: 3px solid var(--black); outline-offset: 3px; }
+        .cta-sec {
+            font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--cta-body); text-decoration: underline; text-underline-offset: 4px;
+            text-decoration-color: rgba(0,0,0,0.3);
+        }
+        .cta-sec:hover { text-decoration-color: var(--cta-body); }
+        .cta-sec:focus-visible { outline: 3px solid var(--black); outline-offset: 4px; }
+
+        /* ── FOOTER ── */
+        footer { background: #050504; border-top: 1px solid rgba(242,240,235,0.06); padding: 5rem 3rem 3rem; }
+        .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; margin-bottom: 4rem; }
+        .footer-wordmark { font-family: var(--font-display); font-size: 2.5rem; letter-spacing: 0.1em; display: block; margin-bottom: 1.4rem; }
+        .footer-desc { font-size: 0.65rem; letter-spacing: 0.08em; line-height: 2; color: var(--footer-muted); text-transform: uppercase; max-width: 28ch; }
+        .footer-col h3 { font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--acid); margin-bottom: 1.4rem; }
+        .footer-col ul { list-style: none; }
+        .footer-col ul li { margin-bottom: 0.7rem; }
+        .footer-col ul li a {
+            font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--footer-muted); text-decoration: none;
+            border-bottom: 1px solid transparent; padding-bottom: 1px;
+        }
+        .footer-col ul li a:hover { color: var(--white); border-bottom-color: var(--white); }
+        .footer-col ul li a:focus-visible { outline: var(--focus-ring); outline-offset: 4px; }
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 2rem; border-top: 1px solid rgba(242,240,235,0.06); flex-wrap: wrap; gap: 1rem; }
+        .footer-legal { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--footer-muted); }
+        .footer-proto { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--footer-muted); }
+        .footer-proto span { color: var(--acid); }
+
+        /* ── SCROLL REVEAL ── */
+        @media (prefers-reduced-motion: no-preference) {
+            .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s ease; }
+            .reveal.visible { opacity: 1; transform: translateY(0); }
+            .d1 { transition-delay: 0.1s; }
+            .d2 { transition-delay: 0.2s; }
+            .d3 { transition-delay: 0.3s; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .products-grid { grid-template-columns: 1fr; }
+            .product-card.featured { grid-column: 1; }
+            .about-section, .specs-section { grid-template-columns: 1fr; }
+            .process-steps { grid-template-columns: 1fr 1fr; }
+            .journal-grid { grid-template-columns: 1fr; }
+            .footer-top { grid-template-columns: 1fr 1fr; }
+            .site-nav ul { display: none; }
+            .cta-banner { flex-direction: column; gap: 3rem; align-items: flex-start; }
+            .hero-stats { flex-wrap: wrap; gap: 2rem; }
+            .hero-section { padding: 6rem 1.5rem 4rem; }
+            .about-left, .about-right, .products-section, .process-section,
+            .testimonials-section, .specs-dark, .specs-light,
+            .journal-section { padding: 5rem 1.5rem; }
+            .cta-banner { margin: 0 1.5rem 5rem; padding: 4rem 2.5rem; }
+            footer { padding: 4rem 1.5rem 2rem; }
+        }
+
+        @media (max-width: 600px) {
+            .footer-top { grid-template-columns: 1fr; }
+            .process-steps { grid-template-columns: 1fr; }
+            .nav-minimal { font-size: 0.6rem; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Custom cursor elements (pointer devices only, aria-hidden) -->
+<div id="cursor" aria-hidden="true"></div>
+<div id="cursor-ring" aria-hidden="true"></div>
+
+<!-- SKIP NAVIGATION -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ══════════════════════════════
+     LANDING VIEW
+     role="dialog" so screen readers understand it overlays main content
+     ══════════════════════════════ -->
+<section
+    id="landing-view"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Nanyang Biologics lab entry screen"
+>
+    <canvas id="landing-canvas" aria-hidden="true"></canvas>
+    <div class="landing-grid" aria-hidden="true"></div>
+
+    <!-- Decorative nav — aria-hidden because it's not the primary navigation -->
+    <div class="nav-minimal" aria-hidden="true">
+        <div class="logo">NANYANG BIOLOGICS</div>
+        <div>
+            <span class="status-dot"></span>System Online — Protocol 0.1
+        </div>
+        <div>Est. 2024 — Singapore</div>
+    </div>
+
+    <div class="mission-overlay">
+        <h2>Rewriting<br>The <em>Architecture</em><br>of Life</h2>
+        <p>We operate at the intersection of computational biology and human design — engineering the future of the somatic form.</p>
+    </div>
+
+    <div class="enter-container">
+        <button
+            class="enter-btn"
+            type="button"
+            id="enter-btn"
+            aria-label="Enter the Nanyang Biologics lab — proceed to main site"
+        >
+            <span class="enter-label" aria-hidden="true">Access Terminal</span>
+            <span class="enter-big" aria-hidden="true">ENTER<br>LAB →</span>
+        </button>
+    </div>
+</section>
+
+<!-- ══════════════════════════════
+     MAIN SITE (LAB VIEW)
+     ══════════════════════════════ -->
+<div id="lab-view">
+
+    <!-- Primary navigation -->
+    <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#main-content" class="wordmark" style="text-decoration:none; color:inherit;">NANYANG BIOLOGICS</a>
+        <ul role="list">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#process">Protocol</a></li>
+            <li><a href="#journal">Journal</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <button class="nav-cta" type="button">Book Consultation</button>
+    </nav>
+
+    <main id="main-content" tabindex="-1">
+
+        <!-- HERO -->
+        <section class="hero-section" aria-labelledby="hero-heading">
+            <canvas id="dna-canvas-hero" aria-hidden="true"></canvas>
+            <div class="hero-gradient" aria-hidden="true"></div>
+            <div class="hero-content">
+                <p class="hero-eyebrow">Human Architecture &amp; Design Bureau</p>
+                <h1 class="hero-title" id="hero-heading">
+                    <!-- Full readable text; spans are purely visual -->
+                    <span class="sr-only">Nanyang Biologics</span>
+                    <span aria-hidden="true">
+                        SYN<span class="outline">THE</span>TIC<br>
+                        GENO<span class="acid-text">MICS</span><br>
+                        LAB
+                    </span>
+                </h1>
+                <div class="hero-bottom">
+                    <p class="hero-desc">Precision genetic engineering for aesthetic and functional optimization of the human biosystem.</p>
+                    <!-- Stats as a description list for semantics -->
+                    <div class="hero-stats">
+                        <dl>
+                            <div class="stat-item">
+                                <dt class="stat-lbl">Sequences Archived</dt>
+                                <dd class="stat-num">847<span class="accent" aria-hidden="true">+</span><span class="sr-only"> plus</span></dd>
+                            </div>
+                            <div class="stat-item">
+                                <dt class="stat-lbl">Edit Precision</dt>
+                                <dd class="stat-num">99.<span class="accent">7%</span></dd>
+                            </div>
+                            <div class="stat-item">
+                                <dt class="stat-lbl">Base Pairs Per Second</dt>
+                                <dd class="stat-num">14<span class="accent">K</span></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARQUEE — decorative ticker, hidden from AT -->
+        <div class="marquee-bar" aria-hidden="true">
+            <div class="marquee-track">
+                <span class="marquee-item"><span class="dot">◆</span>CRISPR Sequencing</span>
+                <span class="marquee-item"><span class="dot">◆</span>Chromosomal Storage</span>
+                <span class="marquee-item"><span class="dot">◆</span>Metabolic Tuning</span>
+                <span class="marquee-item"><span class="dot">◆</span>Ocular Modification</span>
+                <span class="marquee-item"><span class="dot">◆</span>Genetic Estate Planning</span>
+                <span class="marquee-item"><span class="dot">◆</span>Epigenetic Mapping</span>
+                <span class="marquee-item"><span class="dot">◆</span>Proteome Analysis</span>
+                <span class="marquee-item"><span class="dot">◆</span>Biosystem Architecture</span>
+                <span class="marquee-item"><span class="dot">◆</span>CRISPR Sequencing</span>
+                <span class="marquee-item"><span class="dot">◆</span>Chromosomal Storage</span>
+                <span class="marquee-item"><span class="dot">◆</span>Metabolic Tuning</span>
+                <span class="marquee-item"><span class="dot">◆</span>Ocular Modification</span>
+                <span class="marquee-item"><span class="dot">◆</span>Genetic Estate Planning</span>
+                <span class="marquee-item"><span class="dot">◆</span>Epigenetic Mapping</span>
+                <span class="marquee-item"><span class="dot">◆</span>Proteome Analysis</span>
+                <span class="marquee-item"><span class="dot">◆</span>Biosystem Architecture</span>
+            </div>
+        </div>
+
+        <!-- ABOUT -->
+        <section class="about-section" aria-labelledby="about-heading">
+            <div class="about-left">
+                <div>
+                    <p class="section-tag reveal" aria-hidden="true">About Nanyang</p>
+                    <h2 class="big-heading reveal d1" id="about-heading">The future<br>is authored<br>in base pairs</h2>
+                </div>
+                <dl class="metrics-grid reveal d2" aria-label="Key laboratory metrics">
+                    <div class="metric-box">
+                        <dt class="metric-lbl">Sequencing Resolution</dt>
+                        <dd class="metric-val">4nm</dd>
+                    </div>
+                    <div class="metric-box">
+                        <dt class="metric-lbl">Cold Storage Grade</dt>
+                        <dd class="metric-val">ISO 27</dd>
+                    </div>
+                    <div class="metric-box">
+                        <dt class="metric-lbl">Full Genome Analysis</dt>
+                        <dd class="metric-val">72hr</dd>
+                    </div>
+                    <div class="metric-box">
+                        <dt class="metric-lbl">Archive Lifespan</dt>
+                        <dd class="metric-val" aria-label="Unlimited">∞</dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="about-right">
+                <p class="section-tag reveal">Mission Statement</p>
+                <p class="serif-body reveal d1">We believe the human body is the most sophisticated design problem ever posed. At Nanyang Biologics, we apply <em>rigorous computational biology</em> to human optimization — treating the genome not as fate, but as <em>living architecture</em> awaiting refinement.</p>
+                <p class="serif-body reveal d2">Our clients are pioneers — those unwilling to accept the arbitrary lottery of birth as a terminal condition. Through <em>precision CRISPR editing, deep sequencing, and chromosomal archival</em>, we offer sovereignty over the biological self.</p>
+            </div>
+        </section>
+
+        <!-- SERVICES -->
+        <section class="products-section" id="services" aria-labelledby="services-heading">
+            <div class="products-header reveal">
+                <div class="products-heading">
+                    <span class="sub">Services &amp; Protocols</span>
+                    <h2 id="services-heading">Offerings<br>V. 2.0</h2>
+                </div>
+                <a href="#" class="view-all">View all protocols<span class="sr-only"> (opens protocol catalogue)</span></a>
+            </div>
+            <ul class="products-grid" role="list" aria-label="Service protocols">
+
+                <li class="product-card featured reveal">
+                    <p class="card-id" aria-hidden="true">Protocol — 01:00 / Flagship</p>
+                    <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="#c8f53b" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <ellipse cx="24" cy="24" rx="10" ry="20"/>
+                        <line x1="14" y1="24" x2="34" y2="24" opacity="0.4"/>
+                        <circle cx="24" cy="24" r="3" fill="#c8f53b"/>
+                    </svg>
+                    <p class="card-category">Precision Editing</p>
+                    <h3 class="card-name">CRISPR Sequencing &amp; Edit Suite</h3>
+                    <p class="card-desc">Complete base-pair editing for aesthetic and functional optimization. Includes ocular pigment adjustment, height projection modeling, and metabolic efficiency tuning across 47 genetic markers.</p>
+                    <p class="card-price">$24,000 <span class="unit">per full panel</span></p>
+                    <div class="card-footer">
+                        <button class="card-btn" type="button">Request Access</button>
+                        <span class="card-status status-on">Available</span>
+                    </div>
+                </li>
+
+                <li class="product-card reveal d1">
+                    <p class="card-id" aria-hidden="true">Protocol — 02:45</p>
+                    <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="#c8f53b" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <rect x="8" y="8" width="32" height="32" rx="2"/>
+                        <line x1="8" y1="20" x2="40" y2="20"/>
+                        <line x1="8" y1="32" x2="40" y2="32"/>
+                        <line x1="20" y1="8" x2="20" y2="40"/>
+                    </svg>
+                    <p class="card-category">Long-Term Storage</p>
+                    <h3 class="card-name">Chromosomal Archive</h3>
+                    <p class="card-desc">Zero-degradation cold storage for your complete genomic sequence. Cryptographic access control, off-site vaulting, secure retrieval.</p>
+                    <p class="card-price">$4,800 <span class="unit">per 25-year term</span></p>
+                    <div class="card-footer">
+                        <button class="card-btn ghost" type="button">Inquire</button>
+                        <span class="card-status status-on">Available</span>
+                    </div>
+                </li>
+
+                <li class="product-card reveal d2">
+                    <p class="card-id" aria-hidden="true">Protocol — 03:10</p>
+                    <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="#c8f53b" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <circle cx="24" cy="24" r="16"/>
+                        <line x1="24" y1="8" x2="24" y2="40"/>
+                        <line x1="8" y1="24" x2="40" y2="24"/>
+                        <circle cx="24" cy="24" r="5"/>
+                    </svg>
+                    <p class="card-category">Epigenetic Analysis</p>
+                    <h3 class="card-name">Methylation Mapping</h3>
+                    <p class="card-desc">Full epigenome profiling across 28 million CpG sites. Identifies expression patterns and longevity biomarkers.</p>
+                    <p class="card-price">$8,500 <span class="unit">per analysis</span></p>
+                    <div class="card-footer">
+                        <button class="card-btn ghost" type="button">Inquire</button>
+                        <span class="card-status status-ltd">Limited slots</span>
+                    </div>
+                </li>
+
+                <li class="product-card reveal d1">
+                    <p class="card-id" aria-hidden="true">Protocol — 04:20</p>
+                    <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="#c8f53b" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <polyline points="4,40 14,24 24,32 34,12 44,20"/>
+                        <circle cx="14" cy="24" r="3" fill="#c8f53b"/>
+                        <circle cx="34" cy="12" r="3" fill="#c8f53b"/>
+                    </svg>
+                    <p class="card-category">Metabolic Design</p>
+                    <h3 class="card-name">Biometric Optimization</h3>
+                    <p class="card-desc">Targeted gene expression modulation for metabolic rate, cellular repair cycles, and VO2 ceiling expansion.</p>
+                    <p class="card-price">$12,200 <span class="unit">per protocol</span></p>
+                    <div class="card-footer">
+                        <button class="card-btn ghost" type="button">Inquire</button>
+                        <span class="card-status status-ltd">Limited slots</span>
+                    </div>
+                </li>
+
+                <li class="product-card reveal d2">
+                    <p class="card-id" aria-hidden="true">Protocol — 05:00</p>
+                    <svg class="card-icon" viewBox="0 0 48 48" fill="none" stroke="#c8f53b" stroke-width="1.5" aria-hidden="true" focusable="false">
+                        <path d="M24 4 L44 16 L44 32 L24 44 L4 32 L4 16 Z"/>
+                        <path d="M24 14 L34 20 L34 28 L24 34 L14 28 L14 20 Z"/>
+                        <circle cx="24" cy="24" r="4" fill="#c8f53b" opacity="0.35"/>
+                    </svg>
+                    <p class="card-category">Heritage</p>
+                    <h3 class="card-name">Genetic Estate Planning</h3>
+                    <p class="card-desc">Legal genomic estate structuring. Inheritance mapping, trait propagation modeling, and legacy sequencing for generational continuity.</p>
+                    <p class="card-price">$31,000 <span class="unit">per estate</span></p>
+                    <div class="card-footer">
+                        <button class="card-btn" type="button">Request Access</button>
+                        <span class="card-status status-on">Available</span>
+                    </div>
+                </li>
+
+            </ul>
+        </section>
+
+        <!-- PROCESS -->
+        <section class="process-section" id="process" aria-labelledby="process-heading">
+            <p class="section-tag reveal">Our Protocol</p>
+            <h2 class="big-heading reveal d1" id="process-heading">From intake<br>to expression</h2>
+            <ol class="process-steps" aria-label="Four-step engagement process">
+                <li class="process-step reveal">
+                    <span class="step-num" aria-hidden="true">01</span>
+                    <div class="step-icon" aria-hidden="true">⬡</div>
+                    <h3 class="step-title">Intake &amp; Sequencing</h3>
+                    <p class="step-desc">Saliva collection kit dispatched. Full genome sequenced across 6.4 billion base pairs at 4nm resolution via ONT PromethION.</p>
+                    <p class="step-dur"><span class="sr-only">Duration: </span>72 hours</p>
+                </li>
+                <li class="process-step reveal d1">
+                    <span class="step-num" aria-hidden="true">02</span>
+                    <div class="step-icon" aria-hidden="true">◈</div>
+                    <h3 class="step-title">Analysis &amp; Design</h3>
+                    <p class="step-desc">AI-assisted genomic cartography identifies optimization vectors. Private briefing with our chief architects and ethics board.</p>
+                    <p class="step-dur"><span class="sr-only">Duration: </span>14 days</p>
+                </li>
+                <li class="process-step reveal d2">
+                    <span class="step-num" aria-hidden="true">03</span>
+                    <div class="step-icon" aria-hidden="true">◇</div>
+                    <h3 class="step-title">Edit &amp; Validation</h3>
+                    <p class="step-desc">CRISPR-Cas9 execution across target loci. Triple-blind validation against off-target effects. Full documentation issued.</p>
+                    <p class="step-dur"><span class="sr-only">Duration: </span>30 days</p>
+                </li>
+                <li class="process-step reveal d3">
+                    <span class="step-num" aria-hidden="true">04</span>
+                    <div class="step-icon" aria-hidden="true">⬟</div>
+                    <h3 class="step-title">Archive &amp; Delivery</h3>
+                    <p class="step-desc">Edited sequence archived in ISO-27 cold storage. Full genomic passport issued. Ongoing monitoring enrolled.</p>
+                    <p class="step-dur"><span class="sr-only">Duration: </span>Perpetual</p>
+                </li>
+            </ol>
+        </section>
+
+        <!-- TESTIMONIALS -->
+        <section class="testimonials-section" aria-labelledby="testimonials-heading">
+            <p class="section-tag reveal">Client Testimonials</p>
+            <h2 class="big-heading reveal d1" id="testimonials-heading" style="margin-bottom: 4rem;">Those who<br>have evolved</h2>
+            <div
+                class="t-scroll"
+                role="region"
+                aria-label="Client testimonials — scroll horizontally for more"
+                tabindex="0"
+            >
+                <article class="t-card">
+                    <blockquote>
+                        <p class="t-quote">"The precision of Nanyang's edit suite is <em>categorically different</em> from anything else available. My metabolic markers shifted within 8 weeks of implementation."</p>
+                        <footer class="t-meta">
+                            <div>
+                                <cite class="t-name">M. Herschel</cite>
+                                <p class="t-role">Venture Partner — Tier I Fund</p>
+                            </div>
+                            <p class="t-stars" aria-label="5 out of 5 stars">★★★★★</p>
+                        </footer>
+                    </blockquote>
+                </article>
+                <article class="t-card">
+                    <blockquote>
+                        <p class="t-quote">"The chromosomal archive gave our family something no other institution could offer — <em>true genetic continuity</em> across generations."</p>
+                        <footer class="t-meta">
+                            <div>
+                                <cite class="t-name">Dr. Ashford-Klein</cite>
+                                <p class="t-role">Bioethicist, Singapore</p>
+                            </div>
+                            <p class="t-stars" aria-label="5 out of 5 stars">★★★★★</p>
+                        </footer>
+                    </blockquote>
+                </article>
+                <article class="t-card">
+                    <blockquote>
+                        <p class="t-quote">"I came for the ocular adjustment. I left with an entirely new understanding of what my body <em>could be</em>. The team at Nanyang Biologics are the best in the field."</p>
+                        <footer class="t-meta">
+                            <div>
+                                <cite class="t-name">X. Okonkwo</cite>
+                                <p class="t-role">Founder, Biotech Sector</p>
+                            </div>
+                            <p class="t-stars" aria-label="5 out of 5 stars">★★★★★</p>
+                        </footer>
+                    </blockquote>
+                </article>
+                <article class="t-card">
+                    <blockquote>
+                        <p class="t-quote">"Nanyang Biologics operates at a level of <em>institutional rigor</em> I found nowhere else. The ethics review alone is more thorough than most clinical trials."</p>
+                        <footer class="t-meta">
+                            <div>
+                                <cite class="t-name">Dr. Nakamura</cite>
+                                <p class="t-role">Chief Science Officer</p>
+                            </div>
+                            <p class="t-stars" aria-label="5 out of 5 stars">★★★★★</p>
+                        </footer>
+                    </blockquote>
+                </article>
+                <article class="t-card">
+                    <blockquote>
+                        <p class="t-quote">"The level of discretion and <em>technical mastery</em> at Nanyang Biologics is unmatched. Our family's genetic legacy is secured for multiple generations."</p>
+                        <footer class="t-meta">
+                            <div>
+                                <cite class="t-name">A. Voss-Hartmann</cite>
+                                <p class="t-role">Private Client, Estate Programme</p>
+                            </div>
+                            <p class="t-stars" aria-label="5 out of 5 stars">★★★★★</p>
+                        </footer>
+                    </blockquote>
+                </article>
+            </div>
+        </section>
+
+        <!-- SPECS -->
+        <section class="specs-section" aria-labelledby="specs-heading">
+            <div class="specs-dark">
+                <p class="section-tag reveal">Technical Specifications</p>
+                <h2 class="specs-heading reveal d1" id="specs-heading">Precision<br>by the<br>numbers</h2>
+                <dl class="spec-list reveal d2" aria-label="Technical specifications">
+                    <div class="spec-row">
+                        <dt class="sk">Sequencing Platform</dt>
+                        <dd class="sv">ONT PromethION 48</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Edit Modality</dt>
+                        <dd class="sv">CRISPR-Cas9 / BE4max</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Read Length</dt>
+                        <dd class="sv">Up to 4Mb N50</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Off-target Rate</dt>
+                        <dd class="sv">Less than 0.0003%</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Cold Storage</dt>
+                        <dd class="sv">−196°C / LN₂</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Ethics Board</dt>
+                        <dd class="sv">IGB Certified, Class III</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Data Encryption</dt>
+                        <dd class="sv">AES-256 + Genomic Hash</dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="specs-light">
+                <p class="section-tag reveal">Certifications</p>
+                <h2 class="specs-heading reveal d1">Licensed.<br>Certified.<br>Sovereign.</h2>
+                <dl class="spec-list reveal d2" aria-label="Certification details">
+                    <div class="spec-row">
+                        <dt class="sk">Jurisdiction</dt>
+                        <dd class="sv">International Waters + Switzerland</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Ethics Review</dt>
+                        <dd class="sv">Mandatory per protocol</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Data Sovereignty</dt>
+                        <dd class="sv">Client-controlled keys</dd>
+                    </div>
+                    <div class="spec-row">
+                        <dt class="sk">Accreditation</dt>
+                        <dd class="sv">IGB Class III / ISO 15189</dd>
+                    </div>
+                </dl>
+                <ul class="cert-badges reveal d3" aria-label="Certification badges" role="list">
+                    <li class="cert">IGB Licensed</li>
+                    <li class="cert">ISO 15189</li>
+                    <li class="cert">GDPR Compliant</li>
+                    <li class="cert">Ethics Reviewed</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- JOURNAL -->
+        <section class="journal-section" id="journal" aria-labelledby="journal-heading">
+            <p class="section-tag reveal">Research Journal</p>
+            <h2 class="big-heading reveal d1" id="journal-heading">From the<br>field</h2>
+            <div class="journal-grid">
+
+                <article class="j-card large reveal">
+                    <time class="j-date" datetime="2024-03">March 2024 — Vol. 4, Issue 12</time>
+                    <p class="j-tag">Feature</p>
+                    <h3 class="j-title">Base-pair aesthetics: the new frontier of human design</h3>
+                    <p class="j-excerpt">How CRISPR precision editing is transitioning from therapeutic to elective — and what it means for the future of identity, beauty, and biological self-determination.</p>
+                    <a href="#" class="j-read">Read full entry<span class="sr-only"> — Base-pair aesthetics</span></a>
+                </article>
+
+                <article class="j-card reveal d1">
+                    <time class="j-date" datetime="2024-02">February 2024</time>
+                    <p class="j-tag">Research</p>
+                    <h3 class="j-title">Methylation clocks and the science of biological age</h3>
+                    <p class="j-excerpt">New data on epigenetic reprogramming across 1,200 client genomes reveals reversible aging markers.</p>
+                    <a href="#" class="j-read">Read<span class="sr-only"> — Methylation clocks</span></a>
+                </article>
+
+                <article class="j-card reveal d2">
+                    <time class="j-date" datetime="2024-01">January 2024</time>
+                    <p class="j-tag">Protocol</p>
+                    <h3 class="j-title">Cold storage standards: why −196°C is the only temperature that matters</h3>
+                    <p class="j-excerpt">Our updated chromosomal archiving protocol exceeds IGB Class III requirements by three orders of magnitude.</p>
+                    <a href="#" class="j-read">Read<span class="sr-only"> — Cold storage standards</span></a>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- CTA BANNER -->
+        <section class="cta-banner reveal" aria-labelledby="cta-heading">
+            <span class="cta-watermark" aria-hidden="true">EVOLVE</span>
+            <div class="cta-text">
+                <h2 id="cta-heading">Ready<br>to evolve?</h2>
+                <p>Our intake team accepts a limited number of new clients per quarter. Schedule a private consultation to begin your genomic assessment.</p>
+            </div>
+            <div class="cta-actions">
+                <button class="cta-primary" type="button">Book private consultation</button>
+                <a href="#" class="cta-sec">View full protocol catalogue</a>
+            </div>
+        </section>
+
+    </main><!-- end #main-content -->
+
+    <!-- FOOTER -->
+    <footer id="contact" aria-label="Site footer">
+        <div class="footer-top">
+            <div>
+                <p class="footer-wordmark">NANYANG BIOLOGICS</p>
+                <p class="footer-desc">Nanyang Biologics. Human Architecture &amp; Design Bureau. Operating at the intersection of computational biology and human potential.</p>
+                <p class="footer-desc" style="margin-top:12px;opacity:.75">456 Alexandra Rd, #04-07<br>Fragrance Empire Building<br>Singapore 119962</p>
+            </div>
+            <nav class="footer-col" aria-label="Protocols navigation">
+                <h3>Protocols</h3>
+                <ul role="list">
+                    <li><a href="#">CRISPR Edit Suite</a></li>
+                    <li><a href="#">Chromosomal Archive</a></li>
+                    <li><a href="#">Methylation Mapping</a></li>
+                    <li><a href="#">Biometric Optimization</a></li>
+                    <li><a href="#">Genetic Estate</a></li>
+                </ul>
+            </nav>
+            <nav class="footer-col" aria-label="Institution navigation">
+                <h3>Institution</h3>
+                <ul role="list">
+                    <li><a href="#">About Nanyang Biologics</a></li>
+                    <li><a href="#">Research Journal</a></li>
+                    <li><a href="#">Ethics Board</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press</a></li>
+                </ul>
+            </nav>
+            <div class="footer-col">
+                <h3>Contact</h3>
+                <ul role="list">
+                    <li>456 Alexandra Rd, #04-07</li>
+                    <li>Fragrance Empire Building</li>
+                    <li>Singapore 119962</li>
+                    <li><a href="/cdn-cgi/l/email-protection#82ebecf6e3e9e7c2f1e5eeace0ebed"><span class="__cf_email__" data-cfemail="d3babda7b2b8b693a0b4bffdb1babc">[email&#160;protected]</span></a></li>
+                    <li><a href="tel:+6568000000">+65 6800 0000</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p class="footer-legal">© 2024 Nanyang Biologics — All modifications subject to ethics review — IGB Licensed</p>
+            <p class="footer-proto">System: <span>Online</span> — Protocol <span>0.1</span></p>
+        </div>
+    </footer>
+
+</div><!-- end #lab-view -->
+
+<!-- Screen-reader-only utility class -->
+<style>
+    .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0;
+        margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+        white-space: nowrap; border: 0;
+    }
+    /* Also used on hero title to provide full readable text */
+</style>
+
+<script>
+    // ── CUSTOM CURSOR (pointer/fine devices only) ──
+    if (window.matchMedia('(pointer: fine)').matches) {
+        const cur = document.getElementById('cursor');
+        const ring = document.getElementById('cursor-ring');
+        if (cur && ring) {
+            let mx=0, my=0, rx=0, ry=0;
+            document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+            (function tick() {
+                cur.style.left = mx+'px'; cur.style.top = my+'px';
+                rx += (mx-rx)*0.13; ry += (my-ry)*0.13;
+                ring.style.left = rx+'px'; ring.style.top = ry+'px';
+                requestAnimationFrame(tick);
+            })();
+        }
+    }
+
+    // ── ENTER LAB ──
+    function enterLab() {
+        const landing = document.getElementById('landing-view');
+
+        // Snap scroll to top instantly before transition plays
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        document.body.classList.add('view-active');
+
+        const delay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1200;
+
+        setTimeout(() => {
+            landing.setAttribute('aria-hidden', 'true');
+            landing.style.display = 'none';
+            // Ensure we're still at top after hidden
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            const main = document.getElementById('main-content');
+            if (main) main.focus();
+        }, delay);
+    }
+
+    // ── DNA HELIX ──
+    function initDna(id, density, align, r, g, b) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+
+        // Don't animate if user prefers reduced motion
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            canvas.style.display = 'none';
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        let W, H, t = 0;
+        const pts = [], bases = ['A','T','C','G'];
+
+        function resize() {
+            W = canvas.width = canvas.offsetWidth;
+            H = canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class P {
+            constructor(y, off, ch) { this.y=y; this.off=off; this.ch=ch; }
+            update(t) {
+                const a = this.y*0.05+t+this.off;
+                const rad = Math.min(W*0.17, 130);
+                const x3 = Math.sin(a)*rad, z3 = Math.cos(a)*rad;
+                const fov = 900, sc = fov/(fov+z3);
+                this.x = W*align + x3*sc;
+                this.sy = this.y*13*sc + H*0.05;
+                this.sz = 11*sc;
+                this.al = sc>1 ? 0.88 : 0.18;
+            }
+            draw() {
+                ctx.font = `bold ${this.sz}px 'DM Mono',monospace`;
+                ctx.fillStyle = `rgba(${r},${g},${b},${this.al})`;
+                ctx.textAlign = 'center';
+                ctx.fillText(this.ch, this.x, this.sy);
+            }
+        }
+
+        for (let i=0; i<80*density; i++) {
+            const c = bases[i%4], p = c==='A'?'T':c==='T'?'A':c==='C'?'G':'C';
+            pts.push(new P(i, 0, c));
+            pts.push(new P(i, Math.PI, p));
+        }
+
+        (function frame() {
+            ctx.clearRect(0, 0, W, H);
+            t += 0.007;
+            ctx.strokeStyle = `rgba(${r},${g},${b},0.09)`;
+            ctx.lineWidth = 0.5;
+            for (let i=0; i<pts.length; i+=2) {
+                const a=pts[i], b2=pts[i+1];
+                a.update(t); b2.update(t);
+                ctx.beginPath(); ctx.moveTo(a.x, a.sy); ctx.lineTo(b2.x, b2.sy); ctx.stroke();
+                a.draw(); b2.draw();
+            }
+            requestAnimationFrame(frame);
+        })();
+    }
+
+    initDna('landing-canvas', 1.8, 0.5, 200, 245, 59);
+    initDna('dna-canvas-hero', 1.2, 0.5, 200, 245, 59);
+
+    // ── SCROLL REVEAL ──
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    } else {
+        // Immediately show all reveal elements
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    // ── WIRE UP ENTER BUTTON ──
+    document.addEventListener('DOMContentLoaded', () => {
+        const enterBtn = document.getElementById('enter-btn');
+        if (enterBtn) {
+            // Click handler
+            enterBtn.addEventListener('click', enterLab);
+            // Escape key dismisses landing
+            document.getElementById('landing-view').addEventListener('keydown', e => {
+                if (e.key === 'Escape') enterLab();
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORMA — Crystalline Structure</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Helvetica+Neue:wght@100;200&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink:    #0a090e;
+    --smoke:  #1a1820;
+    --mist:   #2e2b38;
+    --silver: #8b8799;
+    --pearl:  #c8c4d4;
+    --white:  #f0eef8;
+    --accent: #7b6fff;
+    --gold:   #c9a96e;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--ink);
+    cursor: none;
+  }
+
+  /* ── Custom cursor ── */
+  #cursor {
+    position: fixed; pointer-events: none; z-index: 9999;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--pearl);
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, opacity 0.3s;
+    mix-blend-mode: difference;
+  }
+  #cursor-ring {
+    position: fixed; pointer-events: none; z-index: 9998;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid rgba(200,196,212,0.4);
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s cubic-bezier(0.23,1,0.32,1), width 0.3s, height 0.3s, opacity 0.3s;
+  }
+
+  /* ── Canvas ── */
+  #canvas-wrap {
+    position: fixed; inset: 0;
+  }
+  canvas { display: block; width: 100% !important; height: 100% !important; }
+
+  /* ── Vignette ── */
+  #vignette {
+    position: fixed; inset: 0; pointer-events: none; z-index: 10;
+    opacity: 0;
+    transition: opacity 2.4s cubic-bezier(0.16,1,0.3,1);
+    background:
+      radial-gradient(ellipse 90% 85% at 62% 42%,
+        transparent 35%,
+        rgba(10,9,14,0.27) 65%,
+        rgba(10,9,14,0.49) 85%,
+        rgba(10,9,14,0.58) 100%),
+      linear-gradient(to right,
+        rgba(10,9,14,0.43) 0%,
+        rgba(10,9,14,0.25) 28%,
+        transparent 52%),
+      linear-gradient(to top,
+        rgba(10,9,14,0.39) 0%,
+        rgba(10,9,14,0.15) 22%,
+        transparent 40%);
+  }
+  #vignette.visible { opacity: 1; }
+
+  /* ── Scanline grain ── */
+  #grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 11;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    animation: grain-shift 0.5s steps(2) infinite;
+  }
+  @keyframes grain-shift {
+    0%   { background-position: 0 0; }
+    25%  { background-position: 40px -20px; }
+    50%  { background-position: -10px 30px; }
+    75%  { background-position: 20px 10px; }
+    100% { background-position: 0 0; }
+  }
+
+  /* ── HUD / Progress — vertical right rail ── */
+  #hud {
+    position: fixed; right: 52px; top: 50%; z-index: 20;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    pointer-events: none;
+  }
+
+  #progress-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 200; font-size: 8px;
+    letter-spacing: 0.32em; text-transform: uppercase;
+    color: #dedad0; opacity: 0;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    text-shadow: 0 0 8px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.8);
+    transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1);
+    position: absolute;
+  }
+  #progress-label.visible { opacity: 1; }
+
+  #progress-bar-wrap {
+    width: 1px; height: 140px;
+    background: rgba(139,135,153,0.15);
+    position: relative; overflow: hidden;
+  }
+  #progress-fill {
+    width: 100%; height: 0%;
+    background: linear-gradient(180deg, var(--accent), var(--pearl));
+    transition: height 0.06s linear;
+    position: absolute; bottom: 0;
+  }
+
+  #piece-counter {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 200; font-size: 8px; letter-spacing: 0.24em;
+    color: #dedad0; opacity: 0;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    text-shadow: 0 0 8px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.8);
+    transition: opacity 1s;
+    text-transform: uppercase;
+  }
+  #piece-counter.visible { opacity: 1; }
+
+  #scroll-hint {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300; font-size: 12px;
+    color: #dedad0; letter-spacing: 0.06em;
+    writing-mode: vertical-rl; text-orientation: mixed;
+    text-shadow: 0 0 8px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.95), 0 0 40px rgba(0,0,0,0.8);
+    opacity: 1; transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1);
+    position: absolute;
+  }
+  #scroll-hint.hidden { opacity: 0; }
+
+  /* wrapper that gives both labels a shared slot to crossfade within */
+  #label-slot {
+    position: relative;
+    width: 12px; height: 110px;
+  }
+
+  /* ── Logo / Wordmark ── */
+  #wordmark {
+    position: fixed; top: 44px; left: 60px; z-index: 20;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300; font-size: 22px;
+    letter-spacing: 0.38em; text-transform: uppercase;
+    color: var(--pearl);
+    opacity: 0; transform: translateY(-8px);
+    text-shadow: 0 2px 24px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9);
+    transition: opacity 1.8s cubic-bezier(0.16,1,0.3,1),
+                transform 1.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  #wordmark.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── Hero text (post-assembly) ── */
+  #hero-text {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 0 0 64px 72px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 2.2s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-text.visible { opacity: 1; }
+
+  #hero-text-inner {
+    position: relative;
+    display: flex; flex-direction: column; align-items: flex-start;
+    max-width: 600px;
+  }
+
+  #hero-eyebrow {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 200; font-size: 11px;
+    letter-spacing: 0.42em; text-transform: uppercase;
+    color: #b8aeff;
+    margin-bottom: 16px;
+    transform: translateY(10px);
+    transition: transform 2s 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-text.visible #hero-eyebrow { transform: translateY(0); }
+
+  #hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400; font-size: clamp(44px, 5vw, 76px);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1.0;
+    text-align: left;
+    text-shadow:
+      0 0 4px rgba(0,0,0,1),
+      0 0 16px rgba(0,0,0,1),
+      0 0 40px rgba(0,0,0,0.95),
+      0 0 80px rgba(0,0,0,0.7);
+    transform: translateY(20px);
+    transition: transform 2s 0.1s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-text.visible #hero-title { transform: translateY(0); }
+
+  #hero-title em {
+    font-style: italic; color: #e0dbff; font-weight: 300;
+  }
+
+  #hero-subtitle {
+    margin-top: 18px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 200; font-size: 13px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #d4d0e8; white-space: nowrap;
+    text-shadow:
+      0 0 8px rgba(0,0,0,1),
+      0 0 20px rgba(0,0,0,1),
+      0 0 40px rgba(0,0,0,0.9);
+    transform: translateY(12px);
+    transition: transform 2s 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-text.visible #hero-subtitle { transform: translateY(0); }
+
+  #hero-divider {
+    width: 32px; height: 1px;
+    background: var(--accent);
+    margin-top: 24px;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 1.2s 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-text.visible #hero-divider { transform: scaleX(1); }
+
+  #hero-cta {
+    margin-top: 18px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 300; font-size: 13px;
+    letter-spacing: 0.14em; color: #c8c4dc;
+    text-shadow:
+      0 0 8px rgba(0,0,0,1),
+      0 0 20px rgba(0,0,0,1),
+      0 0 40px rgba(0,0,0,0.9);
+    opacity: 0;
+    transition: opacity 1.6s 1.3s;
+    pointer-events: auto; cursor: none;
+  }
+  #hero-text.visible #hero-cta { opacity: 1; }
+
+  /* ── Landing ripple flash ── */
+  .flash-ring {
+    position: fixed; border-radius: 50%;
+    border: 1px solid rgba(123,111,255,0.6);
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none; z-index: 15;
+    animation: ring-expand 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  @keyframes ring-expand {
+    from { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+    to   { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    #wordmark { font-size: 16px; left: 32px; top: 32px; }
+    #hud { right: 24px; }
+    #hero-text { padding: 0 0 48px 32px; }
+    #hero-title { font-size: clamp(32px, 9vw, 48px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="canvas-wrap"></div>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<div id="wordmark">Forma</div>
+
+<div id="hero-text">
+  <div id="hero-text-inner">
+    <div id="hero-eyebrow">Geometric Precision</div>
+    <div id="hero-title">Where <em>Structure</em><br>Becomes&nbsp;Form</div>
+    <div id="hero-subtitle">64 Crystalline Elements · Rhombic Dodecahedral Symmetry</div>
+    <div id="hero-divider"></div>
+    <div id="hero-cta">Explore the collection ↓</div>
+  </div>
+</div>
+
+<div id="hud">
+  <div id="piece-counter">00 / 64</div>
+  <div id="progress-bar-wrap"><div id="progress-fill"></div></div>
+  <div id="label-slot">
+    <div id="progress-label">Assembly</div>
+    <div id="scroll-hint">scroll to compose</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────
+// CURSOR
+// ─────────────────────────────────────────────────────────
+const cursorDot  = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mx = window.innerWidth/2, my = window.innerHeight/2;
+let rx = mx, ry = my;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function trackCursor() {
+  rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+  cursorDot.style.left  = mx + 'px';  cursorDot.style.top  = my + 'px';
+  cursorRing.style.left = rx + 'px';  cursorRing.style.top = ry + 'px';
+  requestAnimationFrame(trackCursor);
+})();
+
+// ─────────────────────────────────────────────────────────
+// THREE.JS SETUP
+// ─────────────────────────────────────────────────────────
+const wrap     = document.getElementById('canvas-wrap');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = false;          // shadows OFF — huge gain
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding    = THREE.sRGBEncoding;
+renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.82;
+renderer.setClearColor(0x0a090e, 1);
+wrap.appendChild(renderer.domElement);
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x0a090e);
+scene.fog = new THREE.FogExp2(0x0a090e, 0.022);
+
+const camera = new THREE.PerspectiveCamera(38, window.innerWidth/window.innerHeight, 0.05, 300);
+camera.position.set(0, 3, 22);
+camera.lookAt(0, 0, 0);
+
+// ─────────────────────────────────────────────────────────
+// ENVIRONMENT — gradient dome for reflections
+// ─────────────────────────────────────────────────────────
+(function buildEnv() {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  const W = 256, H = 128;
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0,    '#1a1535');
+  grad.addColorStop(0.35, '#110f1e');
+  grad.addColorStop(0.65, '#0e0d18');
+  grad.addColorStop(1,    '#060508');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+  // subtle warm cap
+  const cap = ctx.createRadialGradient(W/2, 0, 0, W/2, 0, H*0.6);
+  cap.addColorStop(0,   'rgba(180,150,255,0.12)');
+  cap.addColorStop(0.4, 'rgba(100,80,200,0.04)');
+  cap.addColorStop(1,   'transparent');
+  ctx.fillStyle = cap; ctx.fillRect(0, 0, W, H);
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  tex.encoding = THREE.sRGBEncoding;
+  const env = pmrem.fromEquirectangular(tex).texture;
+  scene.environment = env;
+  tex.dispose(); pmrem.dispose();
+})();
+
+// ─────────────────────────────────────────────────────────
+// LIGHTING
+// ─────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x1a1530, 2.5));
+
+const key = new THREE.DirectionalLight(0xd0c8ff, 1.8);
+key.position.set(6, 14, 8);
+scene.add(key);
+
+const rim1 = new THREE.DirectionalLight(0x6040ff, 0.7);
+rim1.position.set(-10, 2, -8); scene.add(rim1);
+const rim2 = new THREE.DirectionalLight(0xc09060, 0.4);
+rim2.position.set(8, -4, 12);  scene.add(rim2);
+const fill = new THREE.DirectionalLight(0x8080a0, 0.3);
+fill.position.set(0, -8, 0);  scene.add(fill);
+
+const centerGlow = new THREE.PointLight(0xaa88ff, 0, 18);
+centerGlow.position.set(0, 0, 0); scene.add(centerGlow);
+
+// ─────────────────────────────────────────────────────────
+// STAR FIELD — sparse distant stars, barely visible
+// ─────────────────────────────────────────────────────────
+let dustMat = null;
+(function buildStars() {
+  const N   = 1800;
+  const pos = new Float32Array(N * 3);
+  const bri = new Float32Array(N); // per-star brightness seed
+  for (let i = 0; i < N; i++) {
+    // Fibonacci sphere for even distribution
+    const phi   = Math.acos(1 - 2*(i+0.5)/N);
+    const theta = Math.PI*(1+Math.sqrt(5))*i;
+    const r     = 55 + Math.random()*30; // far away
+    pos[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+    pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    pos[i*3+2] = r*Math.cos(phi);
+    bri[i]     = Math.random();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position',   new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('brightness', new THREE.Float32BufferAttribute(bri, 1));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 } },
+    vertexShader: `
+      attribute float brightness;
+      uniform float uTime;
+      varying float vAlpha;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = 1.2 + brightness * 1.8;
+        gl_Position  = projectionMatrix * mv;
+        // slow twinkle per star
+        vAlpha = 0.18 + brightness * 0.42
+               + 0.08 * sin(uTime * (0.4 + brightness * 0.8) + brightness * 6.28);
+      }`,
+    fragmentShader: `
+      varying float vAlpha;
+      void main() {
+        float d = length(gl_PointCoord - 0.5) * 2.0;
+        if (d > 1.0) discard;
+        gl_FragColor = vec4(0.88, 0.86, 1.0, vAlpha * (1.0 - d*d));
+      }`,
+    transparent: true, depthWrite: false,
+  });
+  const pts = new THREE.Points(geo, mat);
+  scene.add(pts);
+  dustMat = mat; // reuse dustMat ref for uTime update
+})();
+
+// ─────────────────────────────────────────────────────────
+// GEOMETRY — full rhombic dodecahedron
+// ─────────────────────────────────────────────────────────
+function makeRD(S, inflate) {
+  const f = 1 + (inflate || 0);
+  const a = S * f, b = 2 * S * f;
+  const V = [
+    [-a,-a,-a],[a,-a,-a],[a,a,-a],[-a,a,-a],
+    [-a,-a, a],[a,-a, a],[a,a, a],[-a,a, a],
+    [-b,0,0],[b,0,0],[0,-b,0],[0,b,0],[0,0,-b],[0,0,b],
+  ];
+  const FACES = [
+    [7,11,3,8],[7,11,6,13],[6,11,2,9],[3,11,2,12],
+    [4,10,0,8],[5,10,4,13],[1,10,5,9],[0,10,1,12],
+    [3,8,0,12],[4,8,7,13],[2,9,1,12],[5,9,6,13],
+  ];
+  const positions=[], normals=[], uvs=[], indices=[];
+  let vb = 0;
+  FACES.forEach(([ia,ib,ic,id]) => {
+    const va=V[ia],vb2=V[ib],vc=V[ic],vd=V[id];
+    const d1=[vc[0]-va[0],vc[1]-va[1],vc[2]-va[2]];
+    const d2=[vd[0]-vb2[0],vd[1]-vb2[1],vd[2]-vb2[2]];
+    let nx=d1[1]*d2[2]-d1[2]*d2[1], ny=d1[2]*d2[0]-d1[0]*d2[2], nz=d1[0]*d2[1]-d1[1]*d2[0];
+    const nl=Math.sqrt(nx*nx+ny*ny+nz*nz); nx/=nl; ny/=nl; nz/=nl;
+    const cx=(va[0]+vb2[0]+vc[0]+vd[0])/4, cy=(va[1]+vb2[1]+vc[1]+vd[1])/4, cz=(va[2]+vb2[2]+vc[2]+vd[2])/4;
+    if(cx*nx+cy*ny+cz*nz<0){nx=-nx;ny=-ny;nz=-nz;}
+    [va,vb2,vc,vd].forEach((v,vi)=>{
+      positions.push(v[0],v[1],v[2]);
+      normals.push(nx,ny,nz);
+      uvs.push(vi&1,(vi>>1)&1);
+    });
+    indices.push(vb,vb+1,vb+2, vb,vb+2,vb+3);
+    vb+=4;
+  });
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+  geo.setAttribute('normal',   new THREE.Float32BufferAttribute(normals,3));
+  geo.setAttribute('uv',       new THREE.Float32BufferAttribute(uvs,2));
+  geo.setIndex(indices);
+  return geo;
+}
+
+const S       = 0.52;
+const rdGeo   = makeRD(S, 0);
+const edgeGeo = makeRD(S, 0.024);
+
+// ─────────────────────────────────────────────────────────
+// MATERIALS — rich iridescent crystal
+// ─────────────────────────────────────────────────────────
+// MATERIALS — MeshStandard (no transmission pass, much faster)
+// 4 shared instances — never cloned, all 64 pieces share them
+// ─────────────────────────────────────────────────────────
+const PALETTE_MATS = [
+  new THREE.MeshStandardMaterial({ color:0x2a1f50, emissive:0x180e36, emissiveIntensity:0, roughness:0.10, metalness:0.55, envMapIntensity:4.5, transparent:true, opacity:0.84, side:THREE.DoubleSide, depthWrite:false }),
+  new THREE.MeshStandardMaterial({ color:0x0d2a3a, emissive:0x061820, emissiveIntensity:0, roughness:0.12, metalness:0.50, envMapIntensity:4.5, transparent:true, opacity:0.84, side:THREE.DoubleSide, depthWrite:false }),
+  new THREE.MeshStandardMaterial({ color:0x3a1a28, emissive:0x200c18, emissiveIntensity:0, roughness:0.11, metalness:0.52, envMapIntensity:4.5, transparent:true, opacity:0.84, side:THREE.DoubleSide, depthWrite:false }),
+  new THREE.MeshStandardMaterial({ color:0x1e1a30, emissive:0x100e1e, emissiveIntensity:0, roughness:0.09, metalness:0.58, envMapIntensity:4.5, transparent:true, opacity:0.84, side:THREE.DoubleSide, depthWrite:false }),
+];
+
+const centreMat = new THREE.MeshStandardMaterial({
+  color:0x3a2808, emissive:0xc9a060, emissiveIntensity:0,
+  roughness:0.08, metalness:0.7, envMapIntensity:5.5,
+  transparent:true, opacity:0.9, side:THREE.DoubleSide, depthWrite:false,
+});
+
+// ONE shared iridescent shell — no cloning, all edge meshes use this
+const iridMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime:   { value: 0 },
+    uCamPos: { value: new THREE.Vector3() },
+  },
+  vertexShader: `
+    varying vec3 vWorld;
+    varying vec3 vNormal;
+    void main() {
+      vec4 wp = modelMatrix * vec4(position,1.0);
+      vWorld  = wp.xyz;
+      vNormal = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * viewMatrix * wp;
+    }`,
+  fragmentShader: `
+    uniform vec3  uCamPos;
+    uniform float uTime;
+    varying vec3 vWorld;
+    varying vec3 vNormal;
+    vec3 spectral(float t) {
+      t = clamp(t,0.0,1.0);
+      vec3 a = vec3(0.18,0.6,1.0);
+      vec3 b = vec3(0.9,0.3,1.0);
+      vec3 c = vec3(1.0,0.7,0.2);
+      vec3 d = vec3(0.2,0.9,0.6);
+      if(t<0.25) return mix(a,d,t/0.25);
+      if(t<0.5)  return mix(d,b,(t-0.25)/0.25);
+      if(t<0.75) return mix(b,c,(t-0.5)/0.25);
+      return mix(c,a,(t-0.75)/0.25);
+    }
+    void main() {
+      vec3 view = normalize(uCamPos - vWorld);
+      float fr  = pow(1.0 - abs(dot(view, vNormal)), 3.2);
+      float hue = dot(vNormal, normalize(vec3(0.5,1.0,0.3)))*0.5+0.5 + uTime*0.014;
+      vec3  col = spectral(fract(hue));
+      col = mix(vec3(0.5,0.5,0.8), col*1.4, fr*0.9);
+      gl_FragColor = vec4(col, fr * 0.72 + 0.03);
+    }`,
+  transparent:true, depthWrite:false,
+  side:THREE.DoubleSide, blending:THREE.AdditiveBlending,
+});
+
+
+// ─────────────────────────────────────────────────────────
+// BUILD 64 PIECES
+// ─────────────────────────────────────────────────────────
+const NUM = 64;
+
+// Targets: 4×4×4 BCC sub-lattice
+const targets = [];
+for (let i = 0; i < 4; i++)
+  for (let j = 0; j < 4; j++)
+    for (let k = 0; k < 4; k++)
+      targets.push(new THREE.Vector3(
+        (i-1.5)*2*S, (j-1.5)*2*S, (k-1.5)*2*S
+      ));
+
+// Spiral assembly order — from outside-in by distance to origin
+const assemblyOrder = targets.map((_,i)=>i)
+  .sort((a,b) => targets[b].length() - targets[a].length());
+
+// Centre piece
+let centreIdx = 0; let minD = Infinity;
+targets.forEach((t,i)=>{ const d=t.length(); if(d<minD){minD=d;centreIdx=i;}});
+
+// Float positions — Fibonacci sphere
+const floatPos = [];
+for (let i = 0; i < NUM; i++) {
+  const phi   = Math.acos(1 - 2*(i+0.5)/NUM);
+  const theta = Math.PI*(1+Math.sqrt(5))*i;
+  const r     = 11 + Math.random()*5;
+  floatPos.push(new THREE.Vector3(
+    r*Math.sin(phi)*Math.cos(theta),
+    r*Math.sin(phi)*Math.sin(theta)+0.8,
+    r*Math.cos(phi)
+  ));
+}
+// gentle repulsion
+for (let it = 0; it < 40; it++) {
+  for (let a = 0; a < NUM; a++) for (let b = a+1; b < NUM; b++) {
+    const pa=floatPos[a], pb=floatPos[b];
+    const dx=pb.x-pa.x, dy=pb.y-pa.y, dz=pb.z-pa.z;
+    const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+    const minR = S*3.2;
+    if(d<minR && d>0.001){
+      const p=(minR-d)/d*0.5;
+      pa.x-=dx*p; pa.y-=dy*p*0.4; pa.z-=dz*p;
+      pb.x+=dx*p; pb.y+=dy*p*0.4; pb.z+=dz*p;
+    }
+  }
+}
+
+const SEQ_START = 0.03;
+const SEQ_END   = 0.97;
+const WIN       = (SEQ_END - SEQ_START) / NUM;
+
+const pieces = [];
+const pGroup = new THREE.Group();
+scene.add(pGroup);
+
+// Slot by assembly order — outer pieces first
+const slotMap = new Array(NUM);
+assemblyOrder.forEach((pieceIdx, orderIdx) => { slotMap[pieceIdx] = orderIdx; });
+
+for (let i = 0; i < NUM; i++) {
+  const isCentre = (i === centreIdx);
+  const palIdx   = Math.floor(Math.random() * 4);
+  // Single material per mesh (not an array) — 1 draw call instead of 12
+  const mat  = isCentre ? centreMat : PALETTE_MATS[palIdx];
+  const mesh = new THREE.Mesh(rdGeo, mat);
+  // shadows off — set on renderer level but belt-and-suspenders
+  mesh.castShadow    = false;
+  mesh.receiveShadow = false;
+
+  // Shared iridMat — no clone, all edge meshes reference the same object
+  const edgeMesh = new THREE.Mesh(edgeGeo, iridMat);
+  mesh.add(edgeMesh);
+
+  // Random initial rotation (multiples of 90°)
+  mesh.rotation.set(
+    Math.floor(Math.random()*4)*Math.PI/2,
+    Math.floor(Math.random()*4)*Math.PI/2,
+    0
+  );
+
+  const orderIdx = slotMap[i];
+  const slotStart = SEQ_START + orderIdx * WIN;
+  const slotEnd   = slotStart + WIN;
+
+  pieces.push({
+    mesh, isCentre, mat,
+    floatPos: floatPos[i].clone(),
+    tgt:      targets[i],
+    bobOffset: Math.random()*Math.PI*2,
+    bobSpeed:  0.22 + Math.random()*0.28,
+    bobAmp:    0.018 + Math.random()*0.03,
+    rotX:      (Math.random()-0.5)*0.014,
+    rotY:      (Math.random()-0.5)*0.014,
+    slotStart, slotEnd,
+    landed:    false,
+    rotationFrozen: false,
+    landFlash: 0,
+    orderIdx,
+  });
+  mesh.position.copy(floatPos[i]);
+  pGroup.add(mesh);
+}
+
+// ─────────────────────────────────────────────────────────
+// LANDING RIPPLE (DOM flash rings projected to screen)
+// ─────────────────────────────────────────────────────────
+function spawnRipple(worldPos) {
+  const v = worldPos.clone().project(camera);
+  const sx = ( v.x * 0.5 + 0.5) * window.innerWidth;
+  const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+  if (sx < -50 || sx > window.innerWidth+50) return;
+  const size = 100 + Math.random()*60;
+  const el = document.createElement('div');
+  el.className = 'flash-ring';
+  el.style.cssText = `
+    left:${sx}px; top:${sy}px;
+    width:${size}px; height:${size}px;
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+// ─────────────────────────────────────────────────────────
+// UI REFS
+// ─────────────────────────────────────────────────────────
+const progressFill    = document.getElementById('progress-fill');
+const scrollHint      = document.getElementById('scroll-hint');
+const progressLabel   = document.getElementById('progress-label');
+const pieceCounter    = document.getElementById('piece-counter');
+const wordmark        = document.getElementById('wordmark');
+const heroText        = document.getElementById('hero-text');
+const vignetteEl      = document.getElementById('vignette');
+
+let uiRevealed    = false;
+let heroRevealed  = false;
+let landedCount   = 0;
+
+// ─────────────────────────────────────────────────────────
+// CAMERA DOLLY STATE
+// ─────────────────────────────────────────────────────────
+let camAngle   = 0.25;
+let camTilt    = 0.55;
+const TILT_MIN = 0.08, TILT_MAX = 1.3;
+let isDragging = false;
+let lastMX=0, lastMY=0, dragVX=0, dragVY=0;
+
+// Smooth camera radius/height
+let camR_cur = 22,  camR_vel  = 0;
+let lookY_cur = 0.5, lookY_vel = 0;
+
+// Cinematic dolly: start far, ease in
+let cinematicPhase = 0; // 0=opening dolly, 1=during assembly, 2=reveal orbit
+
+// ─────────────────────────────────────────────────────────
+// WEB AUDIO — crystalline ping synthesis
+// ─────────────────────────────────────────────────────────
+let progress = 0, progVel = 0;
+
+// ─────────────────────────────────────────────────────────
+// SCROLL LOCK — wheel drives progress only; page unlocks when done
+// ─────────────────────────────────────────────────────────
+let scrollLocked = true;
+
+function handleWheel(e) {
+  // Always drive progress with wheel; only prevent default while locked
+  // or if scrolling backward while progress is still > 0
+  const goingBack = e.deltaY < 0 && progress > 0;
+  if (scrollLocked || goingBack) e.preventDefault();
+  if (!scrollLocked && !goingBack) return;
+  progVel += e.deltaY * 0.0014;
+  if (!uiRevealed) {
+    uiRevealed = true;
+    progressLabel.classList.add('visible');
+    pieceCounter.classList.add('visible');
+    wordmark.classList.add('visible');
+    scrollHint.classList.add('hidden');
+  }
+}
+window.addEventListener('wheel', handleWheel, { passive: false });
+
+// Unlock scroll when done, re-lock if user scrolls back
+function maybeUnlockScroll() {
+  if (scrollLocked && progress >= 0.99) {
+    scrollLocked = false;
+    document.body.style.overflow = 'auto';
+  } else if (!scrollLocked && progress < 0.99) {
+    scrollLocked = true;
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// PARALLAX — mouse offset nudges camera aim
+// ─────────────────────────────────────────────────────────
+let rawMouseX = 0, rawMouseY = 0; // -1..1 normalised
+let parallaxX = 0, parallaxY = 0; // smoothed
+const PARALLAX_STRENGTH = 0.026;  // ±1.5° ≈ 0.026 rad
+
+window.addEventListener('mousemove', e => {
+  rawMouseX =  (e.clientX / window.innerWidth  - 0.5) * 2;
+  rawMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+});
+
+// ─────────────────────────────────────────────────────────
+// DRAG — orbit
+// ─────────────────────────────────────────────────────────
+window.addEventListener('touchstart', e => {
+  isDragging=true; lastMX=e.touches[0].clientX; lastMY=e.touches[0].clientY;
+  dragVX=0; dragVY=0;
+},{passive:true});
+window.addEventListener('touchmove', e => {
+  if(!isDragging) return;
+  dragVX=(e.touches[0].clientX-lastMX)*0.008;
+  dragVY=(e.touches[0].clientY-lastMY)*0.004;
+  lastMX=e.touches[0].clientX; lastMY=e.touches[0].clientY;
+},{passive:true});
+window.addEventListener('mousedown', e=>{
+  isDragging=true; lastMX=e.clientX; lastMY=e.clientY; dragVX=0; dragVY=0;
+});
+window.addEventListener('mousemove', e=>{
+  if(!isDragging) return;
+  dragVX=(e.clientX-lastMX)*0.008; dragVY=(e.clientY-lastMY)*0.004;
+  lastMX=e.clientX; lastMY=e.clientY;
+});
+window.addEventListener('mouseup',   ()=>isDragging=false);
+window.addEventListener('touchend',  ()=>isDragging=false);
+
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function eio(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function eoBack(t){const c1=1.20158,c3=c1+1;return Math.max(0,1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2));}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+// spring — no object allocation, mutates shared state arrays
+const _springState = { val:0, vel:0 };
+function spring(cur,tgt,vel,k,d,dt){
+  const f=(tgt-cur)*k-vel*d; vel+=f*dt; cur+=vel*dt;
+  _springState.val=cur; _springState.vel=vel;
+}
+
+// Pre-compute neighbour lists so landing doesn't do O(n²) distanceTo
+const NEIGHBOUR_DIST_SQ = (2.5*S)*(2.5*S);
+const neighbours = pieces.map(p =>
+  pieces.filter(q => q !== p && p.tgt.distanceToSquared(q.tgt) < NEIGHBOUR_DIST_SQ)
+);
+
+// Pre-compute fixed friction multipliers at 60fps (avoids Math.pow each frame)
+const PROG_FRICTION  = Math.pow(0.82, 1);   // per-second; applied as *=PROG_FRICTION^dt below
+const DRAG_FRICTION  = Math.pow(0.88, 1);
+// Actually keep Math.pow(x, dt*60) for accuracy but cache the base:
+// (these are already fast — the real wins are elsewhere)
+
+// UI update throttle — only write DOM when values change
+let _lastFillPct = -1;
+let _lastLanded  = -1;
+
+// ─────────────────────────────────────────────────────────
+// ANIMATE
+// ─────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+const HALF_PI = Math.PI / 2;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt      = Math.min(clock.getDelta(), 0.05);
+  const elapsed = clock.getElapsedTime();
+
+  // Progress — only write DOM when value changes
+  progress += progVel * dt;
+  progVel  *= Math.pow(0.82, dt*60);
+  if(Math.abs(progVel)<0.0001) progVel=0;
+  progress = Math.max(0, Math.min(1, progress));
+  const fillPct = (progress*100)|0; // integer truncation avoids float string churn
+  if(fillPct !== _lastFillPct) {
+    progressFill.style.height = fillPct+'%';
+    _lastFillPct = fillPct;
+  }
+
+  // Update shared shader uniforms directly — no traverse needed
+  iridMat.uniforms.uTime.value = elapsed;
+  iridMat.uniforms.uCamPos.value.copy(camera.position);
+  if(dustMat) dustMat.uniforms.uTime.value = elapsed;
+
+  // Drag orbit
+  camAngle -= dragVX;
+  camTilt  -= dragVY;
+  camTilt   = Math.max(TILT_MIN, Math.min(TILT_MAX, camTilt));
+  const friction = Math.pow(0.88, dt*60);
+  dragVX *= friction; dragVY *= friction;
+  if(Math.abs(dragVX)<0.0001) dragVX=0;
+  if(Math.abs(dragVY)<0.0001) dragVY=0;
+
+  // Orbit: normal drift during assembly, very slow drift once complete
+  if (!isDragging && Math.abs(dragVX) < 0.001) {
+    camAngle += progress < 0.92 ? 0.00042 : 0.00030;
+  }
+
+  // Camera radius: open far, tighten as assembly progresses
+  const camR_tgt  = lerp(22, 10.5, eio(progress));
+  const lookY_tgt = lerp(0.6, 0, progress);
+  spring(camR_cur,  camR_tgt,  camR_vel,  3.5, 3.0, dt); camR_cur  = _springState.val; camR_vel  = _springState.vel;
+  spring(lookY_cur, lookY_tgt, lookY_vel, 2.8, 2.6, dt); lookY_cur = _springState.val; lookY_vel = _springState.vel;
+
+  // Smooth parallax
+  parallaxX += (rawMouseX - parallaxX) * 0.04;
+  parallaxY += (rawMouseY - parallaxY) * 0.04;
+
+  camera.position.x = Math.cos(camTilt)*Math.sin(camAngle)*camR_cur;
+  camera.position.z = Math.cos(camTilt)*Math.cos(camAngle)*camR_cur;
+  camera.position.y = Math.sin(camTilt)*camR_cur;
+  // Parallax: offset the lookAt target slightly with mouse
+  camera.lookAt(
+    parallaxX * PARALLAX_STRENGTH * camR_cur,
+    lookY_cur + parallaxY * PARALLAX_STRENGTH * camR_cur * 0.5,
+    0
+  );
+
+  maybeUnlockScroll();
+
+  // Assembly glow
+  const glowT     = Math.max(0,(progress-0.94)/0.06);
+  const glowPulse = 1.0 + Math.sin(elapsed*1.6)*0.15;
+  centerGlow.intensity = glowT * glowPulse * 3.5;
+  centreMat.emissiveIntensity = glowT * glowPulse * 0.9;
+  key.intensity = 1.8 + glowT * 0.6;
+
+  // Animate pieces
+  pieces.forEach((p, pi) => {
+    const raw = (progress - p.slotStart) / (p.slotEnd - p.slotStart);
+    const aT  = Math.max(0, Math.min(1, raw));
+    const {x:tx, y:ty, z:tz} = p.tgt;
+
+    if (aT === 0) {
+      if (p.landed) {
+        p.landed = false;
+        p.rotationFrozen = false;
+        p.landFlash = 0;
+        p.mat.emissiveIntensity = 0;
+        landedCount = Math.max(0, landedCount - 1);
+      }
+      const bobY  = Math.sin(elapsed*p.bobSpeed     + p.bobOffset)*p.bobAmp
+                  + Math.sin(elapsed*p.bobSpeed*0.55 + p.bobOffset*1.4)*p.bobAmp*0.35;
+      const dR    = 0.06;
+      const driftX = Math.cos(elapsed*p.bobSpeed*0.4 + p.bobOffset)*dR;
+      const driftZ = Math.sin(elapsed*p.bobSpeed*0.4 + p.bobOffset)*dR;
+      p.mesh.rotation.y += p.rotY;
+      p.mesh.rotation.x += p.rotX * 0.3;
+      p.mesh.position.set(p.floatPos.x+driftX, p.floatPos.y+bobY, p.floatPos.z+driftZ);
+      return;
+    }
+
+    if (aT >= 1) {
+      p.mesh.position.set(tx, ty, tz);
+      // Snap rotation once then freeze — skip every frame after
+      if (!p.rotationFrozen) {
+        p.mesh.rotation.x = Math.round(p.mesh.rotation.x / HALF_PI) * HALF_PI;
+        p.mesh.rotation.y = Math.round(p.mesh.rotation.y / HALF_PI) * HALF_PI;
+        p.mesh.rotation.z = 0;
+        p.rotationFrozen = true;
+      }
+
+      if (!p.landed) {
+        p.landed = true;
+        landedCount++;
+        spawnRipple(p.tgt);
+        p.landFlash = 1.0;
+        // Use pre-computed neighbour list — no O(n²) search
+        neighbours[pi].forEach(q => {
+          if (q.landed) q.landFlash = Math.max(q.landFlash, 0.5);
+        });
+      }
+
+      if(p.landFlash > 0) {
+        p.landFlash = Math.max(0, p.landFlash - dt*2.2);
+        p.mat.emissiveIntensity = p.landFlash * 0.5;
+      }
+      return;
+    }
+
+    // In-flight
+    const STAGE_H = 4.5;
+    const stageY  = ty + STAGE_H;
+    if (aT < 0.5) {
+      const t1 = eio(aT/0.5);
+      p.mesh.position.x = lerp(p.floatPos.x, tx, t1);
+      p.mesh.position.z = lerp(p.floatPos.z, tz, t1);
+      const bob = Math.sin(elapsed*p.bobSpeed+p.bobOffset)*p.bobAmp*(1-t1);
+      p.mesh.position.y = lerp(p.floatPos.y+bob, stageY, eio(t1));
+      p.mesh.rotation.y += p.rotY*(1-t1);
+    } else {
+      const t2 = (aT-0.5)/0.5;
+      p.mesh.position.x = tx;
+      p.mesh.position.z = tz;
+      p.mesh.position.y = lerp(stageY, ty, eoBack(t2));
+    }
+  });
+
+  // Counter — only write DOM when value changes
+  if (landedCount !== _lastLanded) {
+    pieceCounter.textContent = `${String(landedCount).padStart(2,'0')} / ${String(NUM).padStart(2,'0')}`;
+    _lastLanded = landedCount;
+  }
+
+  // Hero reveal — show when done, hide when scrolling back
+  if (progress > 0.98 && !heroRevealed) {
+    heroRevealed = true;
+    heroText.classList.add('visible');
+    vignetteEl.classList.add('visible');
+  } else if (progress <= 0.98 && heroRevealed) {
+    heroRevealed = false;
+    heroText.classList.remove('visible');
+    vignetteEl.classList.remove('visible');
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// ─────────────────────────────────────────────────────────
+// RESIZE
+// ─────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>

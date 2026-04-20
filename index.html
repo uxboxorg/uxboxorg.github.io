@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>uxbox — portfolio</title>
+<meta name="description" content="Selected 2025 / 2026 website design work by uxbox. We accompany clients from conception and interactive prototypes to implementation and evaluation.">
+
+<link rel="icon" type="image/svg+xml" href="assets/Favicon_black.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="uxbox — portfolio">
+<meta property="og:description" content="Selected 2025 / 2026 website design work by uxbox.">
+<meta property="og:url" content="https://uxboxorg.github.io/">
+<meta property="og:image" content="https://uxboxorg.github.io/assets/uxb-logo.svg">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="uxbox — portfolio">
+<meta name="twitter:description" content="Selected 2025 / 2026 website design work by uxbox.">
+<meta name="twitter:image" content="https://uxboxorg.github.io/assets/uxb-logo.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  img{display:block;max-width:100%;height:auto}
+  a{color:inherit;text-decoration:none}
+
+  :root{
+    --bg:#FAFAF9;
+    --fg:#111111;
+    --muted:#6B6B6B;
+    --rule:#E5E5E2;
+    --accent:#5BFD30;
+    --accent-ink:#1B6A0E;
+    --font:'Geist',ui-sans-serif,system-ui,sans-serif;
+    --mono:'Geist Mono',ui-monospace,Menlo,monospace;
+    --shell:min(1320px, 92vw);
+  }
+
+  body{
+    font-family:var(--font);
+    background:var(--bg);color:var(--fg);
+    font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  :focus{outline:none}
+  :focus-visible{outline:2px solid var(--accent-ink);outline-offset:3px;border-radius:2px}
+
+  .skip{
+    position:absolute;left:12px;top:12px;
+    background:var(--fg);color:var(--bg);
+    padding:10px 14px;border-radius:2px;
+    font-family:var(--mono);font-size:12px;
+    transform:translateY(-150%);transition:transform .2s;z-index:100;
+  }
+  .skip:focus-visible{transform:translateY(0)}
+
+  .shell{width:var(--shell);margin-inline:auto}
+
+  header{padding:32px 0 0}
+  .top{
+    display:flex;justify-content:space-between;align-items:center;
+    padding-bottom:24px;
+  }
+  .logo{display:inline-flex;align-items:center;gap:10px}
+  .logo img{height:28px;width:auto;display:block}
+  .logo .tag{
+    font-family:var(--mono);font-size:11px;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--muted);
+    padding-left:10px;border-left:1px solid var(--rule);
+  }
+  nav{display:flex;gap:20px;font-family:var(--mono);font-size:13px;color:var(--muted)}
+  nav a:hover{color:var(--fg)}
+
+  .intro{padding:64px 0 48px;border-top:1px solid var(--rule)}
+  h1{
+    font-size:clamp(28px,4vw,42px);
+    font-weight:500;letter-spacing:-0.02em;line-height:1.15;
+    max-width:none;
+  }
+  h1 .accent{
+    display:inline-block;padding:0 6px;margin:0 -2px;
+    background:var(--accent);color:var(--fg);
+    border-radius:2px;
+  }
+  .intro p{
+    margin-top:16px;color:var(--muted);max-width:60ch;
+    font-size:16px;line-height:1.6;
+  }
+
+  main{padding-bottom:80px}
+
+  .section-label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+    text-transform:uppercase;letter-spacing:0.08em;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:32px 24px;
+    margin-top:40px;
+  }
+  @media(max-width:1024px){
+    .grid{grid-template-columns:repeat(2, 1fr);gap:32px 24px}
+  }
+  @media(max-width:640px){
+    .grid{grid-template-columns:1fr;gap:32px}
+  }
+
+  .card{
+    display:flex;flex-direction:column;gap:12px;position:relative;
+    border:1px solid var(--rule);
+    border-radius:20px;
+    padding:16px;
+    background:var(--bg);
+    transition:border-color .2s ease, transform .3s ease;
+  }
+  .card:hover{border-color:#C9C9C4;transform:translateY(-2px)}
+  .card .thumb{
+    position:relative;
+    aspect-ratio:16/10;
+    border-radius:12px;overflow:hidden;
+    border:1px solid var(--rule);
+    background:#111;
+  }
+  .card .thumb svg,
+  .card .thumb img{width:100%;height:100%;display:block;object-fit:cover;object-position:center top}
+  .card h2{
+    font-size:17px;font-weight:500;letter-spacing:-0.005em;
+  }
+  .card .title-row{
+    display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  }
+  .card .badge-wip{
+    font-family:var(--mono);font-size:10px;
+    padding:3px 8px;border-radius:999px;
+    border:1px solid var(--rule);
+    color:var(--muted);
+    letter-spacing:0.04em;text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .card p{
+    font-size:14px;color:var(--muted);line-height:1.55;
+  }
+  .card .tags{
+    font-family:var(--mono);font-size:11px;color:var(--muted);
+    letter-spacing:0.04em;
+  }
+  .card .links{
+    display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;
+    position:relative;z-index:2;
+  }
+  .card .links a{
+    font-family:var(--mono);font-size:12px;
+    border:1px solid var(--rule);
+    padding:5px 12px;border-radius:999px;
+    color:var(--fg);
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .card .links a:hover{background:var(--accent);color:var(--fg);border-color:var(--accent)}
+
+  .visit{
+    display:inline-flex;align-items:center;gap:8px;
+    color:var(--fg);
+  }
+  .visit svg{transition:transform .25s ease}
+  .visit:hover svg{transform:translate(3px,-3px)}
+  .visit:hover{color:var(--accent-ink)}
+
+  footer{
+    padding:40px 0 48px;border-top:1px solid var(--rule);
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+    flex-wrap:wrap;gap:16px;
+  }
+  footer a{color:var(--fg)}
+  footer a:hover{color:var(--muted)}
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+
+<a href="#work" class="skip">Skip to work</a>
+
+<header>
+  <div class="shell top">
+    <a class="logo" href="#top" aria-label="uxbox — home">
+      <img src="assets/uxb-logo.svg" alt="uxbox">
+      <span class="tag">Portfolio</span>
+    </a>
+    <nav aria-label="Primary">
+      <a class="visit" href="https://uxbox.org" target="_blank" rel="noopener noreferrer">
+        <span>Visit our website at uxbox.org</span>
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="14" height="14">
+          <path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </nav>
+  </div>
+  <div class="shell">
+    <div class="intro">
+      <h1>Selected <span class="accent">2025 / 2026</span> Website Design Work</h1>
+      <p>We accompany client from conception and interactive prototypes to implementation and evaluation</p>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <div class="section-label">
+    <span>Selected work</span>
+    <span>07 projects</span>
+  </div>
+
+  <section id="work" class="grid">
+
+    <!-- 01 · EasyTiger -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/easytiger.jpg" alt="EasyTiger — homepage" loading="lazy" width="1600" height="1000">
+      </div>
+      <div class="title-row"><h2>EasyTiger</h2><span class="badge-wip">WIP</span></div>
+      <p class="tags">B2B · Directory · WCAG AAA · Mobile friendly</p>
+      <p>Trust-first B2B directory for expats in Vietnam.</p>
+      <div class="links">
+        <a href="https://easytiger.netlify.app/" target="_blank" rel="noopener noreferrer">Open website →</a>
+      </div>
+    </article>
+
+    <!-- 02 · Nanyang Biologics -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/nanyang.jpg" alt="Nanyang Biologics — final direction" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>Nanyang Biologics</h2>
+      <p class="tags">Brand · Web · Singapore</p>
+      <p>Proposals for a Singapore biotech startup. Final proposal plus two earlier proposal routes.</p>
+      <div class="links">
+        <a href="https://uxboxorg.github.io/nanyang-biologics/" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a href="projects/nanyang-helix.html" target="_blank" rel="noopener noreferrer">Helix proposal</a>
+        <a href="projects/nanyang-gattaca.html" target="_blank" rel="noopener noreferrer">Gattaca proposal</a>
+      </div>
+    </article>
+
+    <!-- 03 · Soy Designer -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/soydesigner-v2.jpg" alt="Soy Designer — editorial journal v2" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>Soy Designer</h2>
+      <p class="tags">Editorial · Studio journal</p>
+      <p>Exploration for a journal for UI/UX designers. Iterated from in different styles</p>
+      <div class="links">
+        <a href="projects/soydesigner-v2.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a href="projects/soydesigner-v1.html" target="_blank" rel="noopener noreferrer">Earlier version</a>
+      </div>
+    </article>
+
+    <!-- 04 · GoTeach -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/goteach.jpg" alt="GoTeach — homepage" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>GoTeach</h2>
+      <p class="tags">Education · Web</p>
+      <p>Tutor marketplace for Vietnam — find tutors in any major cities.</p>
+      <div class="links">
+        <a href="https://www.goteach.vn/en/" target="_blank" rel="noopener noreferrer">Open website →</a>
+      </div>
+    </article>
+
+    <!-- 05 · ITO Group -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/ito.jpg" alt="ITO Group — homepage" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>ITO Group</h2>
+      <p class="tags">Audit &amp; Evaluation · Corporate web · Built on WordPress</p>
+      <p>Corporate site for an audit and evaluation group in Vietnam.</p>
+      <div class="links">
+        <a href="https://itogroup.com.vn/" target="_blank" rel="noopener noreferrer">Open website →</a>
+      </div>
+    </article>
+
+    <!-- 06 · CellRX Seoul -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/cellrx.jpg" alt="CellRX Seoul — brand hero" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>CellRX Seoul</h2>
+      <p class="tags">R&amp;D · Brand hero · Interactive</p>
+      <p>Regeneration-formula hero with orbital capsule and bilingual typographic rhythm.</p>
+      <div class="links">
+        <a href="projects/cellrx-seoul.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+      </div>
+    </article>
+
+    <!-- 07 · Crystal Array -->
+    <article class="card">
+      <div class="thumb">
+        <img src="thumbs/forma.jpg" alt="Crystal Array — R&amp;D hero" loading="lazy" width="1600" height="1000">
+      </div>
+      <h2>Crystal Array</h2>
+      <p class="tags">R&amp;D · Brand hero · Interactive</p>
+      <p>Prismatic R&amp;D hero — cold-light gradient, structural geometry.</p>
+      <div class="links">
+        <a href="projects/crystal-array.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+      </div>
+    </article>
+
+  </section>
+</main>
+
+<footer class="shell">
+  <span>© 2026 uxbox</span>
+  <span><a href="mailto:hello@uxbox.org">hello@uxbox.org</a></span>
+</footer>
+
+</body>
+</html>
