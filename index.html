@@ -119,13 +119,13 @@
 
   .card{
     display:flex;flex-direction:column;gap:12px;position:relative;
-    border:1px solid var(--rule);
+    border:1px solid #CFCFCB;
     border-radius:20px;
     padding:16px;
     background:var(--bg);
     transition:border-color .2s ease, transform .3s ease;
   }
-  .card:hover{border-color:#C9C9C4;transform:translateY(-2px)}
+  .card:hover{border-color:#8A8A85;transform:translateY(-2px)}
   .card .thumb{
     position:relative;
     aspect-ratio:16/10;
@@ -178,6 +178,7 @@
   .visit{
     display:inline-flex;align-items:center;gap:8px;
     color:var(--fg);
+    padding:8px 4px;
   }
   .visit svg{transition:transform .25s ease}
   .visit:hover svg{transform:translate(3px,-3px)}
