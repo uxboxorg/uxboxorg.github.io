@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>uxbox — portfolio</title>
-<meta name="description" content="Selected 2025 / 2026 website design work by uxbox. We accompany clients from conception and interactive prototypes to implementation and evaluation.">
+<title>Uxbox — portfolio</title>
+<meta name="description" content="Selected 2025 / 2026 website design work by Uxbox. We accompany clients from conception and interactive prototypes to implementation and evaluation.">
 
 <link rel="icon" type="image/svg+xml" href="assets/Favicon_black.svg" media="(prefers-color-scheme: light)">
 <link rel="icon" type="image/svg+xml" href="assets/Favicon_green.svg" media="(prefers-color-scheme: dark)">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="uxbox — portfolio">
-<meta property="og:description" content="Selected 2025 / 2026 website design work by uxbox.">
+<meta property="og:title" content="Uxbox — portfolio">
+<meta property="og:description" content="Selected 2025 / 2026 website design work by Uxbox.">
 <meta property="og:url" content="https://uxboxorg.github.io/">
 <meta property="og:image" content="https://uxboxorg.github.io/assets/uxb-logo.svg">
 
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="uxbox — portfolio">
-<meta name="twitter:description" content="Selected 2025 / 2026 website design work by uxbox.">
+<meta name="twitter:title" content="Uxbox — portfolio">
+<meta name="twitter:description" content="Selected 2025 / 2026 website design work by Uxbox.">
 <meta name="twitter:image" content="https://uxboxorg.github.io/assets/uxb-logo.svg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,6 +68,7 @@
   .top{
     display:flex;justify-content:space-between;align-items:center;
     padding-bottom:24px;
+    flex-wrap:wrap;gap:12px;
   }
   .logo{display:inline-flex;align-items:center;gap:10px}
   .logo img{height:28px;width:auto;display:block}
@@ -183,6 +184,12 @@
   .visit svg{transition:transform .25s ease}
   .visit:hover svg{transform:translate(3px,-3px)}
   .visit:hover{color:var(--accent-ink)}
+  .visit-short{display:none}
+  @media(max-width:640px){
+    .logo .tag{display:none}
+    .visit-long{display:none}
+    .visit-short{display:inline}
+  }
 
   footer{
     padding:40px 0 48px;border-top:1px solid var(--rule);
@@ -204,13 +211,14 @@
 
 <header>
   <div class="shell top">
-    <a class="logo" href="#top" aria-label="uxbox — home">
-      <img src="assets/uxb-logo.svg" alt="uxbox">
+    <a class="logo" href="#top" aria-label="Uxbox — home">
+      <img src="assets/uxb-logo.svg" alt="Uxbox">
       <span class="tag">Portfolio</span>
     </a>
     <nav aria-label="Primary">
       <a class="visit" href="https://uxbox.org" target="_blank" rel="noopener noreferrer">
-        <span>Visit our website at uxbox.org</span>
+        <span class="visit-long">Visit our website at Uxbox.org</span>
+        <span class="visit-short">Uxbox.org</span>
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="14" height="14">
           <path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -353,7 +361,7 @@
 </main>
 
 <footer class="shell">
-  <span>© 2026 uxbox</span>
+  <span>© 2026 Uxbox</span>
   <span><a href="mailto:hello@uxbox.org">hello@uxbox.org</a></span>
 </footer>
 
