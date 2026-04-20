@@ -6,7 +6,8 @@
 <title>uxbox — portfolio</title>
 <meta name="description" content="Selected 2025 / 2026 website design work by uxbox. We accompany clients from conception and interactive prototypes to implementation and evaluation.">
 
-<link rel="icon" type="image/svg+xml" href="assets/Favicon_black.svg">
+<link rel="icon" type="image/svg+xml" href="assets/Favicon_black.svg" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/svg+xml" href="assets/Favicon_green.svg" media="(prefers-color-scheme: dark)">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="uxbox — portfolio">
@@ -167,6 +168,9 @@
     transition:background .15s, color .15s, border-color .15s;
   }
   .card .links a:hover{background:var(--accent);color:var(--fg);border-color:var(--accent)}
+  .card .links a.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .card .links a.primary:hover{background:var(--accent);color:var(--fg);border-color:var(--accent)}
+  .card .stretched{position:absolute;inset:0;border-radius:inherit;z-index:1}
 
   .visit{
     display:inline-flex;align-items:center;gap:8px;
@@ -227,6 +231,7 @@
 
     <!-- 01 · EasyTiger -->
     <article class="card">
+      <a class="stretched" href="https://easytiger.netlify.app/" target="_blank" rel="noopener noreferrer" aria-label="EasyTiger — open in new tab"></a>
       <div class="thumb">
         <img src="thumbs/easytiger.jpg" alt="EasyTiger — homepage" loading="lazy" width="1600" height="1000">
       </div>
@@ -234,12 +239,13 @@
       <p class="tags">B2B · Directory · WCAG AAA · Mobile friendly</p>
       <p>Trust-first B2B directory for expats in Vietnam.</p>
       <div class="links">
-        <a href="https://easytiger.netlify.app/" target="_blank" rel="noopener noreferrer">Open website →</a>
+        <a class="primary" href="https://easytiger.netlify.app/" target="_blank" rel="noopener noreferrer">Open website →</a>
       </div>
     </article>
 
     <!-- 02 · Nanyang Biologics -->
     <article class="card">
+      <a class="stretched" href="https://uxboxorg.github.io/nanyang-biologics/" target="_blank" rel="noopener noreferrer" aria-label="Nanyang Biologics — open prototype in new tab"></a>
       <div class="thumb">
         <img src="thumbs/nanyang.jpg" alt="Nanyang Biologics — final direction" loading="lazy" width="1600" height="1000">
       </div>
@@ -247,7 +253,7 @@
       <p class="tags">Brand · Web · Singapore</p>
       <p>Proposals for a Singapore biotech startup. Final proposal plus two earlier proposal routes.</p>
       <div class="links">
-        <a href="https://uxboxorg.github.io/nanyang-biologics/" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a class="primary" href="https://uxboxorg.github.io/nanyang-biologics/" target="_blank" rel="noopener noreferrer">View prototype →</a>
         <a href="projects/nanyang-helix.html" target="_blank" rel="noopener noreferrer">Helix proposal</a>
         <a href="projects/nanyang-gattaca.html" target="_blank" rel="noopener noreferrer">Gattaca proposal</a>
       </div>
@@ -255,6 +261,7 @@
 
     <!-- 03 · Soy Designer -->
     <article class="card">
+      <a class="stretched" href="projects/soydesigner-v2.html" target="_blank" rel="noopener noreferrer" aria-label="Soy Designer — open prototype in new tab"></a>
       <div class="thumb">
         <img src="thumbs/soydesigner-v2.jpg" alt="Soy Designer — editorial journal v2" loading="lazy" width="1600" height="1000">
       </div>
@@ -262,13 +269,14 @@
       <p class="tags">Editorial · Studio journal</p>
       <p>Exploration for a journal for UI/UX designers. Iterated from in different styles</p>
       <div class="links">
-        <a href="projects/soydesigner-v2.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a class="primary" href="projects/soydesigner-v2.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
         <a href="projects/soydesigner-v1.html" target="_blank" rel="noopener noreferrer">Earlier version</a>
       </div>
     </article>
 
     <!-- 04 · GoTeach -->
     <article class="card">
+      <a class="stretched" href="https://www.goteach.vn/en/" target="_blank" rel="noopener noreferrer" aria-label="GoTeach — open in new tab"></a>
       <div class="thumb">
         <img src="thumbs/goteach.jpg" alt="GoTeach — homepage" loading="lazy" width="1600" height="1000">
       </div>
@@ -276,12 +284,13 @@
       <p class="tags">Education · Web</p>
       <p>Tutor marketplace for Vietnam — find tutors in any major cities.</p>
       <div class="links">
-        <a href="https://www.goteach.vn/en/" target="_blank" rel="noopener noreferrer">Open website →</a>
+        <a class="primary" href="https://www.goteach.vn/en/" target="_blank" rel="noopener noreferrer">Open website →</a>
       </div>
     </article>
 
     <!-- 05 · ITO Group -->
     <article class="card">
+      <a class="stretched" href="https://itogroup.com.vn/" target="_blank" rel="noopener noreferrer" aria-label="ITO Group — open in new tab"></a>
       <div class="thumb">
         <img src="thumbs/ito.jpg" alt="ITO Group — homepage" loading="lazy" width="1600" height="1000">
       </div>
@@ -289,12 +298,13 @@
       <p class="tags">Audit &amp; Evaluation · Corporate web · Built on WordPress</p>
       <p>Corporate site for an audit and evaluation group in Vietnam.</p>
       <div class="links">
-        <a href="https://itogroup.com.vn/" target="_blank" rel="noopener noreferrer">Open website →</a>
+        <a class="primary" href="https://itogroup.com.vn/" target="_blank" rel="noopener noreferrer">Open website →</a>
       </div>
     </article>
 
     <!-- 06 · CellRX Seoul -->
     <article class="card">
+      <a class="stretched" href="projects/cellrx-seoul.html" target="_blank" rel="noopener noreferrer" aria-label="CellRX Seoul — open prototype in new tab"></a>
       <div class="thumb">
         <img src="thumbs/cellrx.jpg" alt="CellRX Seoul — brand hero" loading="lazy" width="1600" height="1000">
       </div>
@@ -302,12 +312,13 @@
       <p class="tags">R&amp;D · Brand hero · Interactive</p>
       <p>Regeneration-formula hero with orbital capsule and bilingual typographic rhythm.</p>
       <div class="links">
-        <a href="projects/cellrx-seoul.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a class="primary" href="projects/cellrx-seoul.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
       </div>
     </article>
 
     <!-- 07 · Crystal Array -->
     <article class="card">
+      <a class="stretched" href="projects/crystal-array.html" target="_blank" rel="noopener noreferrer" aria-label="Crystal Array — open prototype in new tab"></a>
       <div class="thumb">
         <img src="thumbs/forma.jpg" alt="Crystal Array — R&amp;D hero" loading="lazy" width="1600" height="1000">
       </div>
@@ -315,7 +326,7 @@
       <p class="tags">R&amp;D · Brand hero · Interactive</p>
       <p>Prismatic R&amp;D hero — cold-light gradient, structural geometry.</p>
       <div class="links">
-        <a href="projects/crystal-array.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
+        <a class="primary" href="projects/crystal-array.html" target="_blank" rel="noopener noreferrer">View prototype →</a>
       </div>
     </article>
 
